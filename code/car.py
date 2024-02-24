@@ -1,6 +1,7 @@
 import math
 import pygame
 from settings import *
+from debug import debug
 
 
 class Car(pygame.sprite.Sprite):
@@ -32,20 +33,25 @@ class Car(pygame.sprite.Sprite):
             self.direction.y = 0
 
         if keys[pygame.K_RIGHT]:
-            self.direction.x = 1
+            self.trun(-3)
         elif keys[pygame.K_LEFT]:
-            self.direction.x = -1
+            self.trun(3)
         else:
             self.direction.x = 0
 
-
+    def trun(self,turn):
+        self.angle += turn
+        if 360 < self.angle or self.angle < 0:
+            self.angle = self.angle % 360
     def move(self, speed):
         if self.direction.magnitude() != 0:
             self.direction = self.direction.normalize()
+        self.direction.x += speed * math.cos(math.radians(self.angle))
+        self.direction.y -=  speed * math.sin(math.radians(self.angle))
 
-        self.hitbox.x += self.direction.x * speed
+        self.hitbox.x += self.direction.x
         self.collision('horizontal')
-        self.hitbox.y += self.direction.y * speed
+        self.hitbox.y += self.direction.y
         self.collision('vertical')
         self.rect.center = self.hitbox.center
     def collision(self, direction):
@@ -65,8 +71,16 @@ class Car(pygame.sprite.Sprite):
                     if self.direction.y < 0:  # moving up
                         self.hitbox.top = sprite.hitbox.bottom
 
+    def rotate_car(self):
+        rotated_car = pygame.transform.rotate(self.image, self.angle)
+        rotated_car_rect = rotated_car.get_rect(center=(self.rect.x,self.rect.y))
+        self.rect = rotated_car_rect
+
     def update(self):
         self.input()
         self.move(self.speed)
+        #self.rotate_car()
+        debug(self.angle)
+
 
 
