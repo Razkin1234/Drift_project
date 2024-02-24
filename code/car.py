@@ -13,9 +13,12 @@ class Car(pygame.sprite.Sprite):
         self.hitbox = self.rect.inflate(0, 0)
 
         #moving things
-        self.direction = pygame.math.Vector2()
-        self.speed = 5
+        self.direction = pygame.math.Vector2() #the car movement
+        self.speed = 0
         self.angle = 0
+        self.gas = False
+        self.max_speed = 10
+        self.reverse = False #for the slowing down while reversing
 
         #the screen:
         self.display_surface = display_surface
@@ -24,33 +27,53 @@ class Car(pygame.sprite.Sprite):
 
     def input(self):
         keys = pygame.key.get_pressed()
-
+        if not keys[pygame.K_UP]:
+            self.gas = False
         if keys[pygame.K_UP]:
-            self.direction.x += self.speed * math.cos(math.radians(self.angle + 90))
-            self.direction.y -= self.speed * math.sin(math.radians(self.angle + 90))
+            self.gas = True
         elif keys[pygame.K_DOWN]:
-            #brake will be here
-            pass
-        else:
-            self.direction.y = 0
+            if self.speed!=0:
+                self.brake()
+            else:
+                pass #reverse mehod here
 
         if keys[pygame.K_RIGHT]:
             self.trun(-3)
         elif keys[pygame.K_LEFT]:
             self.trun(3)
-        else:
-            self.direction.x = 0
 
+    def brake(self):   #making the car stop
+        if self.speed != 0:
+            self.speed = self.speed * 0.95
+        if self.speed < 0:
+            self.speed = 0
     def trun(self,turn):
-        self.angle += turn
-        if 360 < self.angle or self.angle < 0:
-            self.angle = self.angle % 360
+        if self.speed != 0:
+            turn = (self.speed/10)*turn
+            self.angle += turn
+            if 360 < self.angle or self.angle < 0:
+                self.angle = self.angle % 360
 
-    def move(self, speed):
+    def acceleraion(self):
+        if self.gas:
+            if self.speed != self.max_speed:
+                self.speed += 0.05
+            if self.speed > self.max_speed:
+                self.speed = self.max_speed
+        else:
+            if self.speed != 0:
+                self.speed -= 0.05
+            if self.speed < 0:
+                self.speed = 0
+
+    def move(self):
+        self.direction.x += self.speed * math.cos(math.radians(self.angle + 90))
+        self.direction.y -= self.speed * math.sin(math.radians(self.angle + 90))
+
         if self.direction.magnitude() != 0:
             self.direction = self.direction.normalize()
-            self.direction.x += speed * math.cos(math.radians(self.angle+90))
-            self.direction.y -=  speed * math.sin(math.radians(self.angle+90))
+            self.direction.x += self.speed * math.cos(math.radians(self.angle+90))
+            self.direction.y -=  self.speed * math.sin(math.radians(self.angle+90))
 
         self.hitbox.x += self.direction.x
         self.collision('horizontal')
@@ -83,11 +106,16 @@ class Car(pygame.sprite.Sprite):
         self.display_surface.blit(rotated_image, rotated_image.get_rect(center=self.image.get_rect(topleft=(offset_pos.x, offset_pos.y)).center).topleft)
         self.rect = self.image.get_rect(center=self.rect.center)
     def update(self):
-        self.input()
-        self.move(self.speed)
-        debug(self.angle)
-        self.draw_img()
-        #self.rotate_car()
+        self.input() #gets an input from keybord
+        self.move() #making the car move
+        self.draw_img() #draws the car
+        self.acceleraion() #for the car speed
+
+
+        if self.speed == 0 : #if the speed=0 i wont move.
+            self.direction = pygame.math.Vector2(0, 0)
+
+        debug(self.speed)
 
 
 
