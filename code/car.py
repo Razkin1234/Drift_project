@@ -26,9 +26,11 @@ class Car(pygame.sprite.Sprite):
         keys = pygame.key.get_pressed()
 
         if keys[pygame.K_UP]:
-            self.direction.y = -1
+            self.direction.x += self.speed * math.cos(math.radians(self.angle + 90))
+            self.direction.y -= self.speed * math.sin(math.radians(self.angle + 90))
         elif keys[pygame.K_DOWN]:
-            self.direction.y = 1
+            #brake will be here
+            pass
         else:
             self.direction.y = 0
 
@@ -43,11 +45,12 @@ class Car(pygame.sprite.Sprite):
         self.angle += turn
         if 360 < self.angle or self.angle < 0:
             self.angle = self.angle % 360
+
     def move(self, speed):
         if self.direction.magnitude() != 0:
             self.direction = self.direction.normalize()
-        self.direction.x += speed * math.cos(math.radians(self.angle))
-        self.direction.y -=  speed * math.sin(math.radians(self.angle))
+            self.direction.x += speed * math.cos(math.radians(self.angle+90))
+            self.direction.y -=  speed * math.sin(math.radians(self.angle+90))
 
         self.hitbox.x += self.direction.x
         self.collision('horizontal')
@@ -72,15 +75,14 @@ class Car(pygame.sprite.Sprite):
                         self.hitbox.top = sprite.hitbox.bottom
 
     def rotate_car(self):
-        rotated_car = pygame.transform.rotate(self.image, self.angle)
-        rotated_car_rect = rotated_car.get_rect(center=(self.rect.x,self.rect.y))
-        self.rect = rotated_car_rect
-
+        rotated_car = pygame.transform.rotate(self.image , self.angle)
+        new_rect = self.image.get_rect(center= self.image.get_rect(topleft = self.rect.topleft).center)
+        self.display_surface.blit(rotated_car,new_rect.topleft)
     def update(self):
         self.input()
         self.move(self.speed)
-        #self.rotate_car()
         debug(self.angle)
+        self.rotate_car()
 
 
 
