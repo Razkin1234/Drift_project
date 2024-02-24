@@ -54,3 +54,5 @@ class YSortCameraGroup(pygame.sprite.Group):
 			if sprite is not car:
 				offset_pos = sprite.rect.topleft - self.offset
 				self.display_surface.blit(sprite.image,offset_pos)
+			# offset_pos = sprite.rect.topleft - self.offset
+			# self.display_surface.blit(sprite.image,offset_pos)

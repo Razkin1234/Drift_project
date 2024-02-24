@@ -74,15 +74,20 @@ class Car(pygame.sprite.Sprite):
                     if self.direction.y < 0:  # moving up
                         self.hitbox.top = sprite.hitbox.bottom
 
-    def rotate_car(self):
-        rotated_car = pygame.transform.rotate(self.image , self.angle)
-        new_rect = self.image.get_rect(center= self.image.get_rect(topleft = self.rect.topleft).center)
-        self.display_surface.blit(rotated_car,new_rect.topleft)
+    def draw_img(self):
+        offset = pygame.math.Vector2()
+        offset.x = self.rect.centerx - 640
+        offset.y = self.rect.centery - 360
+        offset_pos = self.rect.topleft - offset
+        rotated_image = pygame.transform.rotate(self.image, self.angle)
+        self.display_surface.blit(rotated_image, rotated_image.get_rect(center=self.image.get_rect(topleft=(offset_pos.x, offset_pos.y)).center).topleft)
+        self.rect = self.image.get_rect(center=self.rect.center)
     def update(self):
         self.input()
         self.move(self.speed)
         debug(self.angle)
-        self.rotate_car()
+        self.draw_img()
+        #self.rotate_car()
 
 
 
