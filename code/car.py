@@ -19,6 +19,7 @@ class Car(pygame.sprite.Sprite):
         self.gas = False
         self.max_speed = 10
         self.reverse = False #for the slowing down while reversing
+        self.max_reverse_speed = -6
 
         #the screen:
         self.display_surface = display_surface
@@ -27,20 +28,23 @@ class Car(pygame.sprite.Sprite):
 
     def input(self):
         keys = pygame.key.get_pressed()
-        if not keys[pygame.K_UP]:
+        if not keys[pygame.K_UP]: #for the gas cancelation
             self.gas = False
+        if not keys[pygame.K_DOWN]: #for the reverse cancelation
+            self.reverse = False
         if keys[pygame.K_UP]:
             self.gas = True
         elif keys[pygame.K_DOWN]:
-            if self.speed!=0:
+            if self.speed > 0:
                 self.brake()
             else:
-                pass #reverse mehod here
+                self.reverse = True #reverse mehod here
 
         if keys[pygame.K_RIGHT]:
             self.trun(-3)
         elif keys[pygame.K_LEFT]:
             self.trun(3)
+
 
     def brake(self):   #making the car stop
         if self.speed != 0:
@@ -54,17 +58,30 @@ class Car(pygame.sprite.Sprite):
             if 360 < self.angle or self.angle < 0:
                 self.angle = self.angle % 360
 
-    def acceleraion(self):
+    def acceleraion(self): #for the moving (forward or backwards)
         if self.gas:
-            if self.speed != self.max_speed:
-                self.speed += 0.05
-            if self.speed > self.max_speed:
+            if self.speed != self.max_speed: #for not passing the max speed
+                if self.speed < 0:
+                    self.speed += 0.1
+                else:
+                    self.speed += 0.05
+            if self.speed > self.max_speed: #for not passing the max speed
                 self.speed = self.max_speed
+        elif self.reverse: #for the reversing
+            if self.speed != self.max_reverse_speed:
+                self.speed -= 0.025
+                print(self.speed)
+            if self.speed < self.max_reverse_speed:
+                self.speed = self.max_reverse_speed
         else:
-            if self.speed != 0:
+            if self.speed > 0: #making the car slower if gas isnt pressed
                 self.speed -= 0.05
-            if self.speed < 0:
-                self.speed = 0
+            if self.speed < 0: #to wlow down whilel reversing
+                self.speed += 0.05
+            if -0.05 < self.speed < 0.05: #to fix a bug
+                if not self.reverse and not self.gas:
+                    self.speed = 0
+
 
     def move(self):
         self.direction.x += self.speed * math.cos(math.radians(self.angle + 90))
