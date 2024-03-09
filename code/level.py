@@ -51,8 +51,8 @@ class YSortCameraGroup(pygame.sprite.Group):
 
 		# for sprite in self.sprites():
 		for sprite in sorted(self.sprites(),key = lambda sprite: sprite.rect.centery):
-			if sprite is not car:
-				offset_pos = sprite.rect.topleft - self.offset
-				self.display_surface.blit(sprite.image,offset_pos)
-			# offset_pos = sprite.rect.topleft - self.offset
-			# self.display_surface.blit(sprite.image,offset_pos)
+			# if sprite is not car:
+			# 	offset_pos = sprite.rect.topleft - self.offset
+			# 	self.display_surface.blit(sprite.image,offset_pos)
+			offset_pos = sprite.rect.topleft - self.offset
+			self.display_surface.blit(sprite.image,offset_pos)

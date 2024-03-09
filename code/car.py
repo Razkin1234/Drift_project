@@ -6,142 +6,99 @@ import numpy
 
 
 class Car(pygame.sprite.Sprite):
-    def __init__(self, pos, groups, obstacle_sprites,display_surface):
+    def __init__(self, pos ,groups, obstacle_sprites,display_surface ):
         super().__init__(groups)
-        #sprite things
-        self.image = pygame.image.load('../graphics/car.png').convert_alpha()
-        self.rect = self.image.get_rect(topleft=pos)
-        self.hitbox = self.rect.inflate(0, 0)
-
-        #moving things
-        self.moving_vector = pygame.math.Vector2() #the car movement
-        self.forward_vector = pygame.math.Vector2() #the vector of direction
-        self.acceleraion_vector = pygame.math.Vector2() #the vector of acceleration
-
-        self.speed = 0
-        self.angle = 0
-        self.gas = False
-        self.max_speed = 10
-        self.reverse = False #for the slowing down while reversing
-        self.max_reverse_speed = -6
-
-        #the screen:
-        self.display_surface = display_surface
+        # drift_acceleration from 0.1 to 2, max_velocity should be less than 1.5
+        pygame.sprite.Sprite.__init__(self)
 
         self.obstacle_sprites = obstacle_sprites
+        self.display_surface = display_surface
+
+        #fir the moving:
+        self.forward_acceleration = 1.0
+        self.backward_acceleration = 1.0
+        self.froward_acceleration_const = 1.0  # the speed while off road
+        self.backward_acceleration_const = 1.0 # the speed while off road
+        self.max_velocity = 0.8
+        self.max_velocity_const = 1.0
+        self.drift_acceleration = 0.3
+        self.friction = 1.08
+        self.velocity_friction = 5
+
+        #for the car image:
+
+        self.original_image = pygame.image.load('../graphics/car.png').convert_alpha() #the car image
+        self.image = self.original_image
+        self.rect = self.image.get_rect(topleft=pos)
+        self.real_x = pos[0]
+        self.real_y = pos[1]
+
+
+        self.angle = 0
+        self.velocity = 0
+        self.delta_x = 0 #the chage
+        self.delta_y = 0 #the change
+        self.mask = pygame.mask.from_surface(self.image) #for the collision
+        self.on_grass = False
+        self.on_finish = False
+
 
     def input(self):
-        keys = pygame.key.get_pressed()
-        if not keys[pygame.K_UP]: #for the gas cancelation
-            self.gas = False
-        if not keys[pygame.K_DOWN]: #for the reverse cancelation
-            self.reverse = False
-        if keys[pygame.K_UP]:
-            self.gas = True
-        elif keys[pygame.K_DOWN]:
-            if self.speed > 0:
-                self.brake()
-            else:
-                self.reverse = True #reverse mehod here
 
-        if keys[pygame.K_RIGHT]:
-            self.trun(-3)
-        elif keys[pygame.K_LEFT]:
-            self.trun(3)
+        pressed = keys = pygame.key.get_pressed()
+
+        #forward and backwards:
+        if pressed[pygame.K_w]:
+            self.velocity += 1 / (self.velocity + self.forward_acceleration)
+        if pressed[pygame.K_s]:
+            self.velocity -= 1 / (self.velocity + self.backward_acceleration)
+
+        #sideways:
+        if pressed[pygame.K_a]:  # left turn
+            self.turn_left(self.delta_x, self.delta_y)
+        if pressed[pygame.K_d]:  # right turn
+            self.turn_right(self.delta_x, self.delta_y)
 
 
-    def brake(self):   #making the car stop
-        if self.speed != 0:
-            self.speed = self.speed * 0.95
-        if self.speed < 0:
-            self.speed = 0
-    def trun(self,turn):
-        if self.speed != 0:
-            turn = (abs(self.speed)/10)*turn #to turn faster if the speeed is higher
-            self.angle += turn
-            if 360 < self.angle or self.angle < 0:
-                self.angle = self.angle % 360
-
-    def acceleraion(self): #for the moving (forward or backwards)
-        if self.gas:
-            if self.speed != self.max_speed: #for not passing the max speed
-                if self.speed < 0: #if im moving backwards
-                    self.speed += 0.25 #for braking while reversing
-                else:
-                    self.speed += 0.05
-            if self.speed > self.max_speed: #for not passing the max speed
-                self.speed = self.max_speed
-        elif self.reverse: #for the reversing
-            if self.speed != self.max_reverse_speed:
-                self.speed -= 0.025
-            if self.speed < self.max_reverse_speed:
-                self.speed = self.max_reverse_speed
-        else:
-            if self.speed > 0: #making the car slower if gas isnt pressed
-                self.speed -= 0.05
-            if self.speed < 0: #to wlow down whilel reversing
-                self.speed += 0.05
-            if -0.05 < self.speed < 0.05: #to fix a bug
-                if not self.reverse and not self.gas:
-                    self.speed = 0
-
-
-    def move(self):
-
-        self.forward_vector = self.moving_vector.copy() #to know the direction before turning
-
-        self.acceleraion_vector.x += self.speed * math.cos(math.radians(self.angle + 90)) #for the directions
-        self.acceleraion_vector.y -= self.speed * math.sin(math.radians(self.angle + 90))
-
-        self.moving_vector.x = self.acceleraion_vector.x + self.forward_vector.x
-        self.moving_vector.y = self.acceleraion_vector.y + self.forward_vector.y
-
-        if self.moving_vector.magnitude() != 0:
-            self.moving_vector = self.moving_vector.normalize()
-            self.moving_vector.x += self.speed * math.cos(math.radians(self.angle+90))
-            self.moving_vector.y -=  self.speed * math.sin(math.radians(self.angle+90))
-
-        self.hitbox.x += self.moving_vector.x
-        self.collision('horizontal')
-        self.hitbox.y += self.moving_vector.y
-        self.collision('vertical')
-        self.rect.center = self.hitbox.center
-    def collision(self, direction):
-        if direction == 'horizontal':
-            for sprite in self.obstacle_sprites:
-                if sprite.hitbox.colliderect(self.hitbox):
-                    if self.moving_vector.x > 0:  # moving right
-                        self.hitbox.right = sprite.hitbox.left
-                    if self.moving_vector.x < 0:  # moving left
-                        self.hitbox.left = sprite.hitbox.right
-
-        if direction == 'vertical':
-            for sprite in self.obstacle_sprites:
-                if sprite.hitbox.colliderect(self.hitbox):
-                    if self.moving_vector.y > 0:  # moving down
-                        self.hitbox.bottom = sprite.hitbox.top
-                    if self.moving_vector.y < 0:  # moving up
-                        self.hitbox.top = sprite.hitbox.bottom
-
-    def draw_img(self):
-        offset = pygame.math.Vector2()
-        offset.x = self.rect.centerx - 640
-        offset.y = self.rect.centery - 360
-        offset_pos = self.rect.topleft - offset
-        rotated_image = pygame.transform.rotate(self.image, self.angle)
-        self.display_surface.blit(rotated_image, rotated_image.get_rect(center=self.image.get_rect(topleft=(offset_pos.x, offset_pos.y)).center).topleft)
-        self.rect = self.image.get_rect(center=self.rect.center)
     def update(self):
-        self.input() #gets an input from keybord
-        self.move() #making the car move
-        self.draw_img() #draws the car
-        self.acceleraion() #for the car speed
+
+        self.input()#for the inputs
 
 
-        if self.speed == 0 : #if the speed=0 i wont move.
-            self.moving_vector = pygame.math.Vector2(0, 0)
+        self.velocity = min(self.max_velocity, self.velocity) #for the valocity not being above max
+        self.delta_x += math.sin(math.radians(self.angle)) * self.velocity #for the car rotate of diraction
+        self.delta_y += math.cos(math.radians(self.angle)) * self.velocity #for the car rotate of diraction
+        self.rect.x += int(self.delta_x) #for the rect to change
+        self.rect.y += int(self.delta_y) #for the rect to change
+        self.real_x += int(self.delta_x) #for the rect to change
+        self.real_y += int(self.delta_y) #for the rect to change
 
-        debug(self.speed)
+
+        # for the traction of the car
+        self.delta_x /= self.friction #for the turn to be less sharper
+        self.delta_y /= self.friction #for the turn to be less sharper
+        self.velocity /= self.velocity_friction #for the next time sharper
+        if abs(self.velocity) < 0.01: self.velocity = 0  # to make the velocity 0
+        self.angle = int(self.angle)
+        self.angle %= 360  # for the angle to be 0 < angle < 360
+
+
+    def turn_left(self, x, y):  #adjusting the object's angle of rotation based on its current movement direction
+        angle = int(+(self.drift_acceleration + self.velocity / 3) * math.sqrt(x ** 2 + y ** 2))
+        self.angle += angle
+        self.image = pygame.transform.rotate(self.original_image, self.angle)
+        center_x, center_y = self.rect.center  # Save its current center.
+        self.rect = self.image.get_rect()  # Replace old rect with new rect.
+        self.rect.center = (center_x, center_y)
+
+    def turn_right(self, x, y):  # adjusting the object's angle of rotation based on its current movement direction
+        angle = int(-(self.drift_acceleration + self.velocity / 3) * math.sqrt(x ** 2 + y ** 2))
+        self.angle += angle
+        self.image = pygame.transform.rotate(self.original_image, self.angle)
+        center_x, center_y = self.rect.center  # Save its current center.
+        self.rect = self.image.get_rect()  # Replace old rect with new rect.
+        self.rect.center = (center_x, center_y)
+
 
 
 
