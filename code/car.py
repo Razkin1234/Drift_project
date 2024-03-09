@@ -2,6 +2,7 @@ import math
 import pygame
 from settings import *
 from debug import debug
+import numpy
 
 
 class Car(pygame.sprite.Sprite):
@@ -13,7 +14,10 @@ class Car(pygame.sprite.Sprite):
         self.hitbox = self.rect.inflate(0, 0)
 
         #moving things
-        self.direction = pygame.math.Vector2() #the car movement
+        self.moving_vector = pygame.math.Vector2() #the car movement
+        self.forward_vector = pygame.math.Vector2() #the vector of direction
+        self.acceleraion_vector = pygame.math.Vector2() #the vector of acceleration
+
         self.speed = 0
         self.angle = 0
         self.gas = False
@@ -53,7 +57,7 @@ class Car(pygame.sprite.Sprite):
             self.speed = 0
     def trun(self,turn):
         if self.speed != 0:
-            turn = (self.speed/10)*turn
+            turn = (abs(self.speed)/10)*turn #to turn faster if the speeed is higher
             self.angle += turn
             if 360 < self.angle or self.angle < 0:
                 self.angle = self.angle % 360
@@ -61,8 +65,8 @@ class Car(pygame.sprite.Sprite):
     def acceleraion(self): #for the moving (forward or backwards)
         if self.gas:
             if self.speed != self.max_speed: #for not passing the max speed
-                if self.speed < 0:
-                    self.speed += 0.1
+                if self.speed < 0: #if im moving backwards
+                    self.speed += 0.25 #for braking while reversing
                 else:
                     self.speed += 0.05
             if self.speed > self.max_speed: #for not passing the max speed
@@ -70,7 +74,6 @@ class Car(pygame.sprite.Sprite):
         elif self.reverse: #for the reversing
             if self.speed != self.max_reverse_speed:
                 self.speed -= 0.025
-                print(self.speed)
             if self.speed < self.max_reverse_speed:
                 self.speed = self.max_reverse_speed
         else:
@@ -84,34 +87,40 @@ class Car(pygame.sprite.Sprite):
 
 
     def move(self):
-        self.direction.x += self.speed * math.cos(math.radians(self.angle + 90))
-        self.direction.y -= self.speed * math.sin(math.radians(self.angle + 90))
 
-        if self.direction.magnitude() != 0:
-            self.direction = self.direction.normalize()
-            self.direction.x += self.speed * math.cos(math.radians(self.angle+90))
-            self.direction.y -=  self.speed * math.sin(math.radians(self.angle+90))
+        self.forward_vector = self.moving_vector.copy() #to know the direction before turning
 
-        self.hitbox.x += self.direction.x
+        self.acceleraion_vector.x += self.speed * math.cos(math.radians(self.angle + 90)) #for the directions
+        self.acceleraion_vector.y -= self.speed * math.sin(math.radians(self.angle + 90))
+
+        self.moving_vector.x = self.acceleraion_vector.x + self.forward_vector.x
+        self.moving_vector.y = self.acceleraion_vector.y + self.forward_vector.y
+
+        if self.moving_vector.magnitude() != 0:
+            self.moving_vector = self.moving_vector.normalize()
+            self.moving_vector.x += self.speed * math.cos(math.radians(self.angle+90))
+            self.moving_vector.y -=  self.speed * math.sin(math.radians(self.angle+90))
+
+        self.hitbox.x += self.moving_vector.x
         self.collision('horizontal')
-        self.hitbox.y += self.direction.y
+        self.hitbox.y += self.moving_vector.y
         self.collision('vertical')
         self.rect.center = self.hitbox.center
     def collision(self, direction):
         if direction == 'horizontal':
             for sprite in self.obstacle_sprites:
                 if sprite.hitbox.colliderect(self.hitbox):
-                    if self.direction.x > 0:  # moving right
+                    if self.moving_vector.x > 0:  # moving right
                         self.hitbox.right = sprite.hitbox.left
-                    if self.direction.x < 0:  # moving left
+                    if self.moving_vector.x < 0:  # moving left
                         self.hitbox.left = sprite.hitbox.right
 
         if direction == 'vertical':
             for sprite in self.obstacle_sprites:
                 if sprite.hitbox.colliderect(self.hitbox):
-                    if self.direction.y > 0:  # moving down
+                    if self.moving_vector.y > 0:  # moving down
                         self.hitbox.bottom = sprite.hitbox.top
-                    if self.direction.y < 0:  # moving up
+                    if self.moving_vector.y < 0:  # moving up
                         self.hitbox.top = sprite.hitbox.bottom
 
     def draw_img(self):
@@ -130,7 +139,7 @@ class Car(pygame.sprite.Sprite):
 
 
         if self.speed == 0 : #if the speed=0 i wont move.
-            self.direction = pygame.math.Vector2(0, 0)
+            self.moving_vector = pygame.math.Vector2(0, 0)
 
         debug(self.speed)
 
