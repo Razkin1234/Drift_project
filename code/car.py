@@ -19,8 +19,8 @@ class Car(pygame.sprite.Sprite):
         self.backward_acceleration = 1.0
         self.froward_acceleration_const = 1.0  # the speed while off road
         self.backward_acceleration_const = 1.0 # the speed while off road
-        self.max_velocity = 0.8
-        self.max_velocity_const = 1.0
+        self.max_velocity = 8
+        self.max_velocity_const = 1
         self.drift_acceleration = 0.1
         self.friction = 1.08
         self.velocity_friction = 5
@@ -49,9 +49,10 @@ class Car(pygame.sprite.Sprite):
 
         #forward and backwards:
         if pressed[pygame.K_w]:
-            self.speed += 1 / (self.speed + self.forward_acceleration)
+            self.speed += 1 / (self.speed + self.forward_acceleration) #the origin
+            #self.speed += 0.5
         if pressed[pygame.K_s]:
-            self.speed -= 1 / (self.speed + self.backward_acceleration)
+            self.speed -= 1 / (abs(self.speed) + self.backward_acceleration)
 
         #sideways:
         if pressed[pygame.K_a]:  # left turn
@@ -73,7 +74,8 @@ class Car(pygame.sprite.Sprite):
         self.delta_x /= self.friction  # for the turn to be less sharper
         self.delta_y /= self.friction  # for the turn to be less sharper
         self.speed /= self.velocity_friction  # to reduce the speed
-        if abs(self.speed) < 0.01: self.speed = 0  # to make the velocity 0
+        if abs(self.speed) < 0.01 and self.speed != 0:
+            self.speed = 0  # to make the speed 0
         self.angle = int(self.angle)
         self.angle %= 360  # for the angle to be 0 < angle < 360
 
@@ -99,6 +101,7 @@ class Car(pygame.sprite.Sprite):
         self.input()  # for the inputs
         self.acceleration()  # for the car to gain speed
         self.traction()  # for the traction of the car
+        debug(self.speed)
 
 
 
