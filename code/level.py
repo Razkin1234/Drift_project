@@ -23,7 +23,7 @@ class Level:
 				x = col_index * TILESIZE
 				y = row_index * TILESIZE
 				if col == 'x':
-					Tile((x,y),[self.visible_sprites,self.obstacle_sprites])
+					Tile((x,y),[self.visible_sprites,self.obstacle_sprites], 'rock')
 				if col == 'p':
 					self.car = Car((x,y),[self.visible_sprites],self.obstacle_sprites,self.display_surface)
 

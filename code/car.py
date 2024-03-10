@@ -36,8 +36,8 @@ class Car(pygame.sprite.Sprite):
 
         self.angle = 0
         self.speed = 0 #speed
-        self.delta_x = 0 #the chage
-        self.delta_y = 0 #the change
+        self.delta_x = 0 #the chage of angle
+        self.delta_y = 0 #the change if angle
         self.mask = pygame.mask.from_surface(self.image) #for the collision
         self.on_grass = False
         self.on_finish = False
@@ -70,14 +70,18 @@ class Car(pygame.sprite.Sprite):
         self.real_x += int(self.delta_x)  # for the rect to change
         self.real_y += int(self.delta_y)  # for the rect to change
 
+
     def traction(self):
         self.delta_x /= self.friction  # for the turn to be less sharper
         self.delta_y /= self.friction  # for the turn to be less sharper
         self.speed /= self.velocity_friction  # to reduce the speed
         if abs(self.speed) < 0.01 and self.speed != 0:
             self.speed = 0  # to make the speed 0
+
+
         self.angle = int(self.angle)
         self.angle %= 360  # for the angle to be 0 < angle < 360
+
 
 
 
@@ -97,11 +101,40 @@ class Car(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()  # Replace old rect with new rect.
         self.rect.center = (center_x, center_y)
 
+
+    def collision(self): #for if the car is out track
+        for sprite in self.obstacle_sprites:
+            if pygame.sprite.collide_mask(self,sprite):
+                if sprite.sprite_type == 'grass': #for grass
+                    self.delta_x = -self.delta_x // 1.4
+                    self.delta_y = -self.delta_y // 1.4
+                else:
+                    if self.delta_x > 0:  # moving right
+                        self.rect.right = sprite.hitbox.left
+                    if self.delta_x < 0:  # moving left
+                        self.rect.left = sprite.hitbox.right
+                    if self.delta_y > 0:  # moving down
+                        self.rect.bottom = sprite.hitbox.top
+                    if self.delta_y < 0:  # moving up
+                        self.rect.top = sprite.hitbox.bottom
+
+                    self.speed = -0.2 * self.speed
+                    self.delta_x = -self.delta_x
+                    self.delta_y = - self.delta_y
+
+
+
+
     def update(self):
+
         self.input()  # for the inputs
+        if self.speed != 0: #you can collide only when you are moving
+            self.collision() #for the collisions
         self.acceleration()  # for the car to gain speed
+
         self.traction()  # for the traction of the car
-        debug(self.speed)
+
+        debug(str(self.delta_x) + '  ,  ' + str(self.delta_y) )
 
 
 
