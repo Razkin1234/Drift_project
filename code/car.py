@@ -101,29 +101,29 @@ class Car(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()  # Replace old rect with new rect.
         self.rect.center = (center_x, center_y)
 
+    def collision(self):
+        # Iterate through each obstacle tile
+        for obstacle in self.obstacle_sprites:
+            # Check for collision between the car's mask and the obstacle's mask
+            if pygame.sprite.collide_mask(self, obstacle):
 
-    def collision(self): #for if the car is out track
-        for sprite in self.obstacle_sprites:
-            if pygame.sprite.collide_mask(self,sprite):
-                if sprite.sprite_type == 'grass': #for grass
-                    self.delta_x = -self.delta_x // 1.4
-                    self.delta_y = -self.delta_y // 1.4
-                else:
-                    if self.delta_x > 0:  # moving right
-                        self.rect.right = sprite.hitbox.left
-                    if self.delta_x < 0:  # moving left
-                        self.rect.left = sprite.hitbox.right
-                    if self.delta_y > 0:  # moving down
-                        self.rect.bottom = sprite.hitbox.top
-                    if self.delta_y < 0:  # moving up
-                        self.rect.top = sprite.hitbox.bottom
+                # Handle collision - for example, adjust the car's position
+                # Here you can implement how you want to handle the collision,
+                # for example, stopping the car or adjusting its position
+                self.rect.x -= int(self.delta_x)  # Move back based on the change in x
+                self.rect.y -= int(self.delta_y)  # Move back based on the change in y
+                self.real_x -= int(self.delta_x)  # Update the real x position
+                self.real_y -= int(self.delta_y)  # Update the real y position
+                # Reset speed and acceleration to avoid getting stuck
+                self.speed = 0
+                self.delta_x = 0
+                self.delta_y = 0
+                # Optionally, you can add additional logic here based on the collision
+                # For example, if the obstacle is a finish line, set self.on_finish = True
 
-                    self.speed = -0.2 * self.speed
-                    self.delta_x = -self.delta_x
-                    self.delta_y = - self.delta_y
-
-
-
+                # Depending on your game logic, you might want to break out of the loop
+                # if you only want to handle one collision at a time
+                # break
 
     def update(self):
 
