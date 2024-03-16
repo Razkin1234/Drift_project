@@ -25,6 +25,12 @@ class Car(pygame.sprite.Sprite):
         self.friction = 1.08
         self.velocity_friction = 5
 
+        #input buttons:
+        self.button_forward = pygame.K_UP
+        self.button_backward = pygame.K_DOWN
+        self.button_right = pygame.K_RIGHT
+        self.button_left = pygame.K_LEFT
+
         #for the car image:
 
         self.original_image = pygame.image.load('../graphics/car.png').convert_alpha() #the car image
@@ -48,16 +54,16 @@ class Car(pygame.sprite.Sprite):
         pressed = keys = pygame.key.get_pressed()
 
         #forward and backwards:
-        if pressed[pygame.K_w]:
+        if pressed[self.button_forward]:
             self.speed += 1 / (self.speed + self.forward_acceleration) #the origin
             #self.speed += 0.5
-        if pressed[pygame.K_s]:
+        if pressed[self.button_backward]:
             self.speed -= 1 / (abs(self.speed) + self.backward_acceleration)
 
         #sideways:
-        if pressed[pygame.K_a]:  # left turn
+        if pressed[self.button_left]:  # left turn
             self.turn_left(self.delta_x, self.delta_y)
-        if pressed[pygame.K_d]:  # right turn
+        if pressed[self.button_right]:  # right turn
             self.turn_right(self.delta_x, self.delta_y)
 
 
