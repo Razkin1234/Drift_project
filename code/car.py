@@ -110,26 +110,19 @@ class Car(pygame.sprite.Sprite):
     def collision(self):
         # Iterate through each obstacle tile
         for obstacle in self.obstacle_sprites:
-            # Check for collision between the car's mask and the obstacle's mask
             if pygame.sprite.collide_mask(self, obstacle):
 
                 # Handle collision - for example, adjust the car's position
                 # Here you can implement how you want to handle the collision,
                 # for example, stopping the car or adjusting its position
-                self.rect.x -= int(self.delta_x)  # Move back based on the change in x
-                self.rect.y -= int(self.delta_y)  # Move back based on the change in y
-                self.real_x -= int(self.delta_x)  # Update the real x position
-                self.real_y -= int(self.delta_y)  # Update the real y position
+                self.rect.x -= int(self.delta_x)+2 # Move back based on the change in x
+                self.rect.y -= int(self.delta_y)+2  # Move back based on the change in y
+                self.real_x -= int(self.delta_x)+2  # Update the real x position
+                self.real_y -= int(self.delta_y)+2  # Update the real y position
                 # Reset speed and acceleration to avoid getting stuck
-                self.speed = 0
-                self.delta_x = 0
-                self.delta_y = 0
-                # Optionally, you can add additional logic here based on the collision
-                # For example, if the obstacle is a finish line, set self.on_finish = True
-
-                # Depending on your game logic, you might want to break out of the loop
-                # if you only want to handle one collision at a time
-                # break
+                self.speed = -int(self.speed)
+                self.delta_x = -int(self.delta_x)
+                self.delta_y = -int(self.delta_y)
 
     def update(self):
 
