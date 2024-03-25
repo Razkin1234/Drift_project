@@ -42,8 +42,12 @@ class Car(pygame.sprite.Sprite):
 
         self.angle = 0
         self.speed = 0 #speed
-        self.delta_x = 0 #the chage of angle
-        self.delta_y = 0 #the change if angle
+        
+        self.moving_vector = pygame.Vector2() #the vector of moving
+
+        self.moving_vector.x = 0 #the chage of angle
+        self.moving_vector.y = 0 #the change if angle
+
         self.mask = pygame.mask.from_surface(self.image) #for the collision
         self.on_grass = False
         self.on_finish = False
@@ -62,24 +66,24 @@ class Car(pygame.sprite.Sprite):
 
         #sideways:
         if pressed[self.button_left]:  # left turn
-            self.turn_left(self.delta_x, self.delta_y)
+            self.turn_left(self.moving_vector.x, self.moving_vector.y)
         if pressed[self.button_right]:  # right turn
-            self.turn_right(self.delta_x, self.delta_y)
+            self.turn_right(self.moving_vector.x, self.moving_vector.y)
 
 
     def acceleration(self):
         self.speed = min(self.max_velocity, self.speed)  # for the valocity not being above max
-        self.delta_x += math.sin(math.radians(self.angle)) * self.speed  # for the car rotate of diraction
-        self.delta_y += math.cos(math.radians(self.angle)) * self.speed  # for the car rotate of diraction
-        self.rect.x += int(self.delta_x)  # for the rect to change
-        self.rect.y += int(self.delta_y)  # for the rect to change
-        self.real_x += int(self.delta_x)  # for the rect to change
-        self.real_y += int(self.delta_y)  # for the rect to change
+        self.moving_vector.x += math.sin(math.radians(self.angle)) * self.speed  # for the car rotate of diraction
+        self.moving_vector.y += math.cos(math.radians(self.angle)) * self.speed  # for the car rotate of diraction
+        self.rect.x += int(self.moving_vector.x)  # for the rect to change
+        self.rect.y += int(self.moving_vector.y)  # for the rect to change
+        self.real_x += int(self.moving_vector.x)  # for the rect to change
+        self.real_y += int(self.moving_vector.y)  # for the rect to change
 
 
     def traction(self):
-        self.delta_x /= self.friction  # for the turn to be less sharper
-        self.delta_y /= self.friction  # for the turn to be less sharper
+        self.moving_vector.x /= self.friction  # for the turn to be less sharper
+        self.moving_vector.y /= self.friction  # for the turn to be less sharper
         self.speed /= self.velocity_friction  # to reduce the speed
         if abs(self.speed) < 0.01 and self.speed != 0:
             self.speed = 0  # to make the speed 0
@@ -111,14 +115,14 @@ class Car(pygame.sprite.Sprite):
         # Iterate through each obstacle tile
         for obstacle in self.obstacle_sprites:
             if pygame.sprite.collide_mask(self, obstacle):
-                self.rect.x -= int(self.delta_x)+2 # Move back based on the change in x
-                self.rect.y -= int(self.delta_y)+2  # Move back based on the change in y
-                self.real_x -= int(self.delta_x)+2  # Update the real x position
-                self.real_y -= int(self.delta_y)+2  # Update the real y position
+                self.rect.x -= int(self.moving_vector.x)+2 # Move back based on the change in x
+                self.rect.y -= int(self.moving_vector.y)+2  # Move back based on the change in y
+                self.real_x -= int(self.moving_vector.x)+2  # Update the real x position
+                self.real_y -= int(self.moving_vector.y)+2  # Update the real y position
 
                 self.speed = 0 #for
-                self.delta_x = -int(self.delta_x)
-                self.delta_y = -int(self.delta_y)
+                self.moving_vector.x = -int(self.moving_vector.x)
+                self.moving_vector.y = -int(self.moving_vector.y)
 
     def update(self):
 
@@ -129,7 +133,7 @@ class Car(pygame.sprite.Sprite):
 
         self.traction()  # for the traction of the car
 
-        #debug(str(self.delta_x) + '  ,  ' + str(self.delta_y) )
+        #debug(str(self.moving_vector.x) + '  ,  ' + str(self.moving_vector.y) )
         debug(self.drift_acceleration)
         
 
