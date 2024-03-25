@@ -55,10 +55,10 @@ class Car(pygame.sprite.Sprite):
 
         #forward and backwards:
         if pressed[self.button_forward]:
-            self.speed += 1 / (self.speed + self.forward_acceleration) #the origin
+            self.speed += 0.85 / (self.speed + self.forward_acceleration) #the origin
             #self.speed += 0.5
         if pressed[self.button_backward]:
-            self.speed -= 1 / (abs(self.speed) + self.backward_acceleration)
+            self.speed -= 0.85 / (abs(self.speed) + self.backward_acceleration)
 
         #sideways:
         if pressed[self.button_left]:  # left turn
@@ -111,16 +111,12 @@ class Car(pygame.sprite.Sprite):
         # Iterate through each obstacle tile
         for obstacle in self.obstacle_sprites:
             if pygame.sprite.collide_mask(self, obstacle):
-
-                # Handle collision - for example, adjust the car's position
-                # Here you can implement how you want to handle the collision,
-                # for example, stopping the car or adjusting its position
                 self.rect.x -= int(self.delta_x)+2 # Move back based on the change in x
                 self.rect.y -= int(self.delta_y)+2  # Move back based on the change in y
                 self.real_x -= int(self.delta_x)+2  # Update the real x position
                 self.real_y -= int(self.delta_y)+2  # Update the real y position
-                # Reset speed and acceleration to avoid getting stuck
-                self.speed = -int(self.speed)
+
+                self.speed = 0 #for
                 self.delta_x = -int(self.delta_x)
                 self.delta_y = -int(self.delta_y)
 
@@ -133,7 +129,9 @@ class Car(pygame.sprite.Sprite):
 
         self.traction()  # for the traction of the car
 
-        debug(str(self.delta_x) + '  ,  ' + str(self.delta_y) )
+        #debug(str(self.delta_x) + '  ,  ' + str(self.delta_y) )
+        debug(self.drift_acceleration)
+        
 
 
 
