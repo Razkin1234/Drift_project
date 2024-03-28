@@ -127,14 +127,14 @@ class Car(pygame.sprite.Sprite):
     def update(self):
 
         self.input()  # for the inputs
-        if self.speed != 0: #you can collide only when you are moving
-            self.collision() #for the collisions
+        #if self.speed != 0: #you can collide only when you are moving
+        #    self.collision() #for the collisions
         self.acceleration()  # for the car to gain speed
 
         self.traction()  # for the traction of the car
 
         #debug(str(self.moving_vector.x) + '  ,  ' + str(self.moving_vector.y) )
-        debug(self.drift_acceleration)
+        #debug(self.drift_acceleration)
         
 
 
