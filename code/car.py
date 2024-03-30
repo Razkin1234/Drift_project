@@ -6,7 +6,7 @@ import numpy
 
 
 class Car(pygame.sprite.Sprite):
-    def __init__(self, pos ,groups, obstacle_sprites,display_surface ):
+    def __init__(self, pos ,groups, obstacle_sprites,display_surface,angle ):
         super().__init__(groups)
         # drift_acceleration from 0.1 to 2, max_velocity should be less than 1.5
         pygame.sprite.Sprite.__init__(self)
@@ -16,7 +16,7 @@ class Car(pygame.sprite.Sprite):
 
         #for the moving:
         self.forward_acceleration = 1.5
-        self.backward_acceleration = 1.5
+        self.backward_acceleration = 2
         self.froward_acceleration_const = 1.0  # the speed while off road
         self.backward_acceleration_const = 1.0 # the speed while off road
         self.max_velocity = 8
@@ -24,6 +24,8 @@ class Car(pygame.sprite.Sprite):
         self.drift_acceleration = 0.1
         self.friction = 1.08
         self.velocity_friction = 5
+
+        self.reverse = False #for the reverse
 
         #input buttons:
         self.button_forward = pygame.K_UP
@@ -40,7 +42,8 @@ class Car(pygame.sprite.Sprite):
         self.real_y = pos[1]
 
 
-        self.angle = 0
+        self.angle = angle
+        self.image = pygame.transform.rotate(self.original_image, self.angle) #that the car will start facing its angle
         self.speed = 0 #speed
         
         self.moving_vector = pygame.Vector2() #the vector of moving
@@ -63,6 +66,9 @@ class Car(pygame.sprite.Sprite):
             #self.speed += 0.5
         if pressed[self.button_backward]:
             self.speed -= 0.85 / (abs(self.speed) + self.backward_acceleration)
+            self.reverse =True
+        elif self.reverse:
+            self.reverse = False #if not on reverse
 
         #sideways:
         if pressed[self.button_left]:  # left turn
@@ -96,16 +102,22 @@ class Car(pygame.sprite.Sprite):
 
 
     def turn_left(self, x, y):  #adjusting the object's angle of rotation based on its current movement direction
-        angle = int(+(self.drift_acceleration + self.speed / 3) * math.sqrt(x ** 2 + y ** 2))*3
-        self.angle += angle
+        if self.reverse:
+            self.angle += 2
+        else:
+            angle = int(+(self.drift_acceleration + (self.speed) / 3) * math.sqrt(x ** 2 + y ** 2)) *3
+            self.angle += angle
         self.image = pygame.transform.rotate(self.original_image, self.angle)
         center_x, center_y = self.rect.center  # Save its current center.
         self.rect = self.image.get_rect()  # Replace old rect with new rect.
         self.rect.center = (center_x, center_y)
 
     def turn_right(self, x, y):  # adjusting the object's angle of rotation based on its current movement direction
-        angle = int(-(self.drift_acceleration + self.speed / 3) * math.sqrt(x ** 2 + y ** 2))*3
-        self.angle += angle
+        if self.reverse: #for the reverse turning
+            self.angle -= 2
+        else:
+            angle = int(-(self.drift_acceleration + (self.speed) / 3) * math.sqrt(x ** 2 + y ** 2))*3
+            self.angle += angle
         self.image = pygame.transform.rotate(self.original_image, self.angle)
         center_x, center_y = self.rect.center  # Save its current center.
         self.rect = self.image.get_rect()  # Replace old rect with new rect.
@@ -135,6 +147,7 @@ class Car(pygame.sprite.Sprite):
 
         #debug(str(self.moving_vector.x) + '  ,  ' + str(self.moving_vector.y) )
         #debug(self.drift_acceleration)
+        debug(self.speed)
         
 
 

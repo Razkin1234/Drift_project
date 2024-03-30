@@ -27,7 +27,7 @@ class Level:
 		self.create_map()
 
 	def create_map(self):
-		self.car = Car((1472, 832), [self.visible_sprites], self.obstacle_sprites, self.display_surface)
+		self.car = Car((1472, 832), [self.visible_sprites], self.obstacle_sprites, self.display_surface,180)
 		for style, layout in self.layout.items():
 			for row_index, row in enumerate(layout):
 				for col_index, col in enumerate(row):
