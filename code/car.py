@@ -15,8 +15,8 @@ class Car(pygame.sprite.Sprite):
         self.display_surface = display_surface
 
         #for the moving:
-        self.forward_acceleration = 1.0
-        self.backward_acceleration = 1.0
+        self.forward_acceleration = 1.5
+        self.backward_acceleration = 1.5
         self.froward_acceleration_const = 1.0  # the speed while off road
         self.backward_acceleration_const = 1.0 # the speed while off road
         self.max_velocity = 8
@@ -96,7 +96,7 @@ class Car(pygame.sprite.Sprite):
 
 
     def turn_left(self, x, y):  #adjusting the object's angle of rotation based on its current movement direction
-        angle = int(+(self.drift_acceleration + self.speed / 3) * math.sqrt(x ** 2 + y ** 2))
+        angle = int(+(self.drift_acceleration + self.speed / 3) * math.sqrt(x ** 2 + y ** 2))*3
         self.angle += angle
         self.image = pygame.transform.rotate(self.original_image, self.angle)
         center_x, center_y = self.rect.center  # Save its current center.
@@ -104,7 +104,7 @@ class Car(pygame.sprite.Sprite):
         self.rect.center = (center_x, center_y)
 
     def turn_right(self, x, y):  # adjusting the object's angle of rotation based on its current movement direction
-        angle = int(-(self.drift_acceleration + self.speed / 3) * math.sqrt(x ** 2 + y ** 2))
+        angle = int(-(self.drift_acceleration + self.speed / 3) * math.sqrt(x ** 2 + y ** 2))*3
         self.angle += angle
         self.image = pygame.transform.rotate(self.original_image, self.angle)
         center_x, center_y = self.rect.center  # Save its current center.
