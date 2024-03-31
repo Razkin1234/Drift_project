@@ -153,7 +153,6 @@ class Car(pygame.sprite.Sprite):
 
         #debug(str(self.moving_vector.x) + '  ,  ' + str(self.moving_vector.y) )
         #debug(self.drift_acceleration)
-        debug(self.on_grass)
         
 
 

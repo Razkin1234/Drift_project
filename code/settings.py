@@ -13,6 +13,8 @@ MAPS = {
 #for the map printing
 ROW_LOAD_TILE_DISTANCE = 8  #8 is the good one
 COL_LOAD_TILE_DISTANCE = 12  #12 is the good one
+ROW_TILES = 22
+COL_TILES = 30
 
 #ui
 UI_FONT = '../graphics/font/joystix.ttf'

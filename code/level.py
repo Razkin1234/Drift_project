@@ -32,8 +32,82 @@ class Level:
 		#the map building
 		self.create_map()
 
+		# floor updating
+		self.car_move = [0, 0]
+		self.car_prev_location = self.car.rect[0:2]
+
+	def floor_update(self):
+
+		car_tile: pygame.math.Vector2 = pygame.math.Vector2(int(self.car.rect.x / TILESIZE),
+															   int(self.car.rect.y / TILESIZE))
+		self.car_move[0] = (car_tile.x - self.car_prev_location[0] // TILESIZE)
+		self.car_move[1] = (car_tile.y - self.car_prev_location[1] // TILESIZE)
+
+		if self.car_move[1] != 0:
+			if self.car_move[1] > 0:
+				row_index_add = int(car_tile.y + (ROW_LOAD_TILE_DISTANCE - 1))
+				row_index_remove = int(car_tile.y - (ROW_LOAD_TILE_DISTANCE))
+			else:
+				row_index_add = int(car_tile.y - (ROW_LOAD_TILE_DISTANCE - 1))
+				row_index_remove = int(car_tile.y + (ROW_LOAD_TILE_DISTANCE))
+			self.floor_sprites.remove_sprites_in_rect((row_index_remove * TILESIZE), 1)
+			self.obstacle_sprites.remove_sprites_in_rect((row_index_remove * TILESIZE), 1)
+
+			for style_index, (style, layout) in enumerate(self.layout.items()):
+				self.floor_sprites.remove_sprites_in_rect(row_index_remove * TILESIZE, 1)
+				self.obstacle_sprites.remove_sprites_in_rect(row_index_remove * TILESIZE, 1)
+				if 0 <= row_index_add < ROW_TILES:
+					row_add = layout[row_index_add]
+					for col_index in range(int(car_tile.x - COL_LOAD_TILE_DISTANCE),
+										   int(car_tile.x + COL_LOAD_TILE_DISTANCE)):
+						if 0 <= col_index < COL_TILES:
+							col = row_add[col_index]
+							if col != '-1':  # -1 in csv means no tile, don't need to recreate the tile if it already exists
+								x: int = col_index * TILESIZE
+								y: int = row_index_add * TILESIZE
+								self.floor_sprites.remove_sprites_in_rect(row_index_remove * TILESIZE, 1)
+								self.obstacle_sprites.remove_sprites_in_rect(row_index_remove * TILESIZE, 1)
+
+								if style == 'floor':
+									tile_path = f'../graphics/tileparts/{col}.png'
+									image_surf = pygame.image.load(tile_path).convert_alpha()
+									Tile((x, y), [self.floor_sprites], 'floor', image_surf)
+								else:
+									pass
+
+		if self.car_move[0] != 0:
+			if self.car_move[0] > 0:
+				col_index_add = int(car_tile.x + (COL_LOAD_TILE_DISTANCE - 1))
+				col_index_remove = int(car_tile.x - (COL_LOAD_TILE_DISTANCE))
+			else:
+				col_index_add = int(car_tile.x - (COL_LOAD_TILE_DISTANCE - 1))
+				col_index_remove = int(car_tile.x + (COL_LOAD_TILE_DISTANCE))
+			self.floor_sprites.remove_sprites_in_rect((col_index_remove * TILESIZE), 0)
+			self.obstacle_sprites.remove_sprites_in_rect((col_index_remove * TILESIZE), 0)
+
+			for style_index, (style, layout) in enumerate(self.layout.items()):
+				for row_index in range(int(car_tile.y - ROW_LOAD_TILE_DISTANCE),
+									   int(car_tile.y + ROW_LOAD_TILE_DISTANCE)):
+					if 0 <= row_index < ROW_TILES:
+						row = layout[row_index]
+						if 0 <= col_index_add < COL_TILES:
+							col = row[col_index_add]
+							if col != '-1':  # -1 in csv means no tile, don't need to recreate the tile if it already exists
+								x: int = col_index_add * TILESIZE
+								y: int = row_index * TILESIZE
+
+								if style == 'floor':
+									tile_path = f'../graphics/tilessyber/{col}.png'
+									image_surf = pygame.image.load(tile_path).convert_alpha()
+									Tile((x, y), [self.floor_sprites], 'floor', image_surf)
+								elif style == 'boundary':
+									Tile((x, y), [self.obstacle_sprites], 'barrier')
+
+		self.car_prev_location = self.car.rect[0:2]
+
 	def create_map(self):
 		self.car = Car((1536, 832), [self.visible_sprites], self.obstacle_sprites, self.display_surface,180,self.checkpoint_sprites)
+		self.car_prev_location = self.car.rect[0:2]
 		for style, layout in self.layout.items():
 			for row_index, row in enumerate(layout):
 				for col_index, col in enumerate(row):

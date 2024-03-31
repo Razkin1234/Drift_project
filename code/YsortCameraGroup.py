@@ -29,3 +29,8 @@ class YSortCameraGroup(pygame.sprite.Group):
 			# 	self.display_surface.blit(sprite.image,offset_pos)
 			offset_pos = sprite.rect.topleft - self.offset
 			self.display_surface.blit(sprite.image,offset_pos)
+
+	def remove_sprites_in_rect(self, rect, axis):
+		for sprite in sorted(self.sprites(), key=lambda x: (x.rect.centery)):
+			if sprite.rect.topleft[axis] == rect:
+				sprite.kill()
