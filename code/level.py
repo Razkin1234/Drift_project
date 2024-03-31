@@ -15,18 +15,21 @@ class Level:
 
 		# sprite group setup
 		self.visible_sprites = YSortCameraGroup()
-		self.obstacle_sprites = pygame.sprite.Group()
+		self.obstacle_sprites = YSortCameraGroup()
 		self.floor_sprites = YSortCameraGroup()
-		self.checkpoint_sprites = pygame.sprite.Group()
+		self.checkpoint_sprites = YSortCameraGroup()
 
-		self.grass_numbers = [4,31,33,40,44] #all the grass numbers in the csv file
+		self.grass_numbers :int = [4,31,33,40,44] #all the grass numbers in the csv file
+
+		#camera
+		self.camera = pygame.math.Vector2()
 
 
 
 		self.layout: dict[str: List[list[int]]] = {
 			'floor' : MAPS['1']['floor'] ,
-			'checkpoints' : MAPS['1']['checkpoints'],
-			'checkpoints_num' : MAPS['1']['checkpoints_num']
+			'checkpoints' : MAPS['1']['checkpoints']
+			#'checkpoints_num' : MAPS['1']['checkpoints_num']
 		}
 
 		#the map building
@@ -71,7 +74,10 @@ class Level:
 								if style == 'floor':
 									tile_path = f'../graphics/tileparts/{col}.png'
 									image_surf = pygame.image.load(tile_path).convert_alpha()
-									Tile((x, y), [self.floor_sprites], 'floor', image_surf)
+									if int(col) in self.grass_numbers:
+										Tile((x, y), [self.floor_sprites , self.obstacle_sprites], 'grass', image_surf)
+									else:
+										Tile((x, y), [self.floor_sprites], 'floor', image_surf)
 								else:
 									pass
 
@@ -97,42 +103,66 @@ class Level:
 								y: int = row_index * TILESIZE
 
 								if style == 'floor':
-									tile_path = f'../graphics/tilessyber/{col}.png'
+									tile_path = f'../graphics/tileparts/{col}.png'
 									image_surf = pygame.image.load(tile_path).convert_alpha()
-									Tile((x, y), [self.floor_sprites], 'floor', image_surf)
-								elif style == 'boundary':
-									Tile((x, y), [self.obstacle_sprites], 'barrier')
+									if int(col) in self.grass_numbers:
+										Tile((x, y), [self.floor_sprites , self.obstacle_sprites], 'grass', image_surf)
+									else:
+										Tile((x, y), [self.floor_sprites], 'floor', image_surf)
+								elif style == 'checkpoints':
+									Tile((x, y), [self.checkpoint_sprites], f'{col}', image_surf)  # the checkpoint type will be his number (51 for finish line)
+								else:
+									pass
 
 		self.car_prev_location = self.car.rect[0:2]
 
 	def create_map(self):
 		self.car = Car((1536, 832), [self.visible_sprites], self.obstacle_sprites, self.display_surface,180,self.checkpoint_sprites)
 		self.car_prev_location = self.car.rect[0:2]
-		for style, layout in self.layout.items():
-			for row_index, row in enumerate(layout):
-				for col_index, col in enumerate(row):
-					if col != '-1':
-						x = col_index * TILESIZE
-						y = row_index * TILESIZE
+		# Center camera
+		self.camera.x = self.car.rect.centerx
+		self.camera.y = self.car.rect.centery
 
-						if style == 'floor':
-							tile_path = f'../graphics/tileparts/{col}.png'
-							image_surf = pygame.image.load(tile_path).convert_alpha()
-							if int(col) in self.grass_numbers:
-								Tile((x, y), [self.floor_sprites,self.obstacle_sprites], 'grass', image_surf)
+		#for printing around the player
+		car_tile: pygame.math.Vector2 = pygame.math.Vector2(int(self.car.rect.x / TILESIZE),
+															   int(self.car.rect.y / TILESIZE))
+		for style, layout in self.layout.items():
+			for row_index in range(int(car_tile.y - ROW_LOAD_TILE_DISTANCE),
+                                   int(car_tile.y + ROW_LOAD_TILE_DISTANCE)):
+				if 0 <= row_index < ROW_TILES:
+					print(row_index)
+					row = layout[row_index]
+					for col_index in range(int(car_tile.x - COL_LOAD_TILE_DISTANCE),
+										   int(car_tile.x + COL_LOAD_TILE_DISTANCE)):
+						if 0 <= col_index < COL_TILES:
+							col = row[col_index]
+						if col != '-1':
+							x = col_index * TILESIZE
+							y = row_index * TILESIZE
+
+							if style == 'floor':
+								tile_path = f'../graphics/tileparts/{col}.png'
+								image_surf = pygame.image.load(tile_path).convert_alpha()
+								if int(col) in self.grass_numbers:
+									Tile((x, y), [self.floor_sprites,self.obstacle_sprites], 'grass', image_surf)
+								else:
+									Tile((x, y), [self.floor_sprites], 'floor', image_surf)
+							elif style == 'checkpoints':
+								Tile((x, y), [self.checkpoint_sprites], f'{col}', image_surf) #the checkpoint type will be his number (51 for finish line)
 							else:
-								Tile((x, y), [self.floor_sprites], 'floor', image_surf)
-						elif style == 'checkpoints':
-							Tile((x, y), [self.checkpoint_sprites], f'{col}', image_surf) #the checkpoint type will be his number (51 for finish line)
-						else:
-							pass
+								pass
 
 	def run(self):
 		# update and draw the game
 		self.floor_sprites.custom_draw(self.car)
 		self.floor_sprites.update()
 
+		# self.obstacle_sprites.custom_draw(self.car)
+		# self.obstacle_sprites.update()
+
 		self.visible_sprites.custom_draw(self.car)
 		self.visible_sprites.update()
+
+		self.floor_update()
 
 

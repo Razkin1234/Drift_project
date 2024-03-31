@@ -152,7 +152,7 @@ class Car(pygame.sprite.Sprite):
         self.traction()  # for the traction of the car
 
         #debug(str(self.moving_vector.x) + '  ,  ' + str(self.moving_vector.y) )
-        #debug(self.drift_acceleration)
+        debug(self.on_grass)
         
 
 
