@@ -78,6 +78,10 @@ class Level:
 										Tile((x, y), [self.floor_sprites , self.obstacle_sprites], 'grass', image_surf)
 									else:
 										Tile((x, y), [self.floor_sprites], 'floor', image_surf)
+								elif style == 'checkpoints':
+									tile_path = f'../graphics/tileparts/checkpoint.png'
+									image_surf = pygame.image.load(tile_path).convert_alpha()
+									Tile((x, y), [self.checkpoint_sprites], f'{col}', image_surf)  # the checkpoint type will be his number (51 for finish line)
 								else:
 									pass
 
@@ -110,6 +114,8 @@ class Level:
 									else:
 										Tile((x, y), [self.floor_sprites], 'floor', image_surf)
 								elif style == 'checkpoints':
+									tile_path = f'../graphics/tileparts/checkpoint.png'
+									image_surf = pygame.image.load(tile_path).convert_alpha()
 									Tile((x, y), [self.checkpoint_sprites], f'{col}', image_surf)  # the checkpoint type will be his number (51 for finish line)
 								else:
 									pass
@@ -148,6 +154,8 @@ class Level:
 								else:
 									Tile((x, y), [self.floor_sprites], 'floor', image_surf)
 							elif style == 'checkpoints':
+								tile_path = f'../graphics/tileparts/checkpoint.png'
+								image_surf = pygame.image.load(tile_path).convert_alpha()
 								Tile((x, y), [self.checkpoint_sprites], f'{col}', image_surf) #the checkpoint type will be his number (51 for finish line)
 							else:
 								pass
@@ -157,8 +165,9 @@ class Level:
 		self.floor_sprites.custom_draw(self.car)
 		self.floor_sprites.update()
 
-		# self.obstacle_sprites.custom_draw(self.car)
-		# self.obstacle_sprites.update()
+		# to see the chekpoints:
+		# self.checkpoint_sprites.custom_draw(self.car)
+		# self.checkpoint_sprites.update()
 
 		self.visible_sprites.custom_draw(self.car)
 		self.visible_sprites.update()
