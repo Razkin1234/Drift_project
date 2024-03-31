@@ -6,12 +6,13 @@ import numpy
 
 
 class Car(pygame.sprite.Sprite):
-    def __init__(self, pos ,groups, obstacle_sprites,display_surface,angle ):
+    def __init__(self, pos ,groups, obstacle_sprites,display_surface,angle,checkpoint_sprites ):
         super().__init__(groups)
         # drift_acceleration from 0.1 to 2, max_velocity should be less than 1.5
         pygame.sprite.Sprite.__init__(self)
 
         self.obstacle_sprites = obstacle_sprites
+        self.checkpoint_sprites = checkpoint_sprites
         self.display_surface = display_surface
 
         #for the moving:
