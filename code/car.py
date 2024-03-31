@@ -17,8 +17,8 @@ class Car(pygame.sprite.Sprite):
         #for the moving:
         self.forward_acceleration = 1.5
         self.backward_acceleration = 2
-        self.froward_acceleration_const = 1.0  # the speed while off road
-        self.backward_acceleration_const = 1.0 # the speed while off road
+        self.froward_acceleration_const = 1.5  # the speed while off road
+        self.backward_acceleration_const = 2 # the speed while off road
         self.max_velocity = 8
         self.max_velocity_const = 1
         self.drift_acceleration = 0.1
@@ -26,6 +26,9 @@ class Car(pygame.sprite.Sprite):
         self.velocity_friction = 5
 
         self.reverse = False #for the reverse
+
+        self.grass_deceleration = -1.2 #for the grass moving
+        self.grass_velocity = -1.5 #for the grass velocity
 
         #input buttons:
         self.button_forward = pygame.K_UP
@@ -123,31 +126,33 @@ class Car(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()  # Replace old rect with new rect.
         self.rect.center = (center_x, center_y)
 
-    def collision(self):
-        # Iterate through each obstacle tile
+    def collision(self): #for the grass
+        on_grass_now = False
         for obstacle in self.obstacle_sprites:
             if pygame.sprite.collide_mask(self, obstacle):
-                self.rect.x -= int(self.moving_vector.x)+2 # Move back based on the change in x
-                self.rect.y -= int(self.moving_vector.y)+2  # Move back based on the change in y
-                self.real_x -= int(self.moving_vector.x)+2  # Update the real x position
-                self.real_y -= int(self.moving_vector.y)+2  # Update the real y position
-
-                self.speed = 0 #for
-                self.moving_vector.x = -int(self.moving_vector.x)
-                self.moving_vector.y = -int(self.moving_vector.y)
-
+                if obstacle.sprite_type == 'grass':
+                    on_grass_now = True #for the turn off of on grass function
+                    if self.on_grass is False:
+                        self.max_velocity -= self.grass_velocity
+                        self.forward_acceleration -= self.grass_deceleration
+                        self.backward_acceleration -= self.grass_deceleration
+                        self.on_grass = True
+        if not on_grass_now and self.on_grass: #if not on grass, drive normaly
+            self.max_velocity = self.max_velocity_const
+            self.forward_acceleration = self.froward_acceleration_const
+            self.backward_acceleration = self.backward_acceleration_const
+            self.on_grass = False
     def update(self):
 
         self.input()  # for the inputs
-        #if self.speed != 0: #you can collide only when you are moving
-        #    self.collision() #for the collisions
+        self.collision() #for the collisions
         self.acceleration()  # for the car to gain speed
 
         self.traction()  # for the traction of the car
 
         #debug(str(self.moving_vector.x) + '  ,  ' + str(self.moving_vector.y) )
         #debug(self.drift_acceleration)
-        debug(self.speed)
+        debug(self.on_grass)
         
 
 
