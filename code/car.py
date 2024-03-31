@@ -59,6 +59,8 @@ class Car(pygame.sprite.Sprite):
         self.on_grass = False
         self.on_finish = False
 
+        self.were_in_checkpoints :int = []
+
 
     def input(self):
 
@@ -143,16 +145,33 @@ class Car(pygame.sprite.Sprite):
             self.forward_acceleration = self.froward_acceleration_const
             self.backward_acceleration = self.backward_acceleration_const
             self.on_grass = False
+
+    def checkpoints_collision(self):
+        for checkpoint in self.checkpoint_sprites:
+            if pygame.sprite.collide_mask(self,checkpoint):
+                if len(self.were_in_checkpoints) == 0:
+                    if checkpoint.sprite_type == '1':
+                        self.were_in_checkpoints.append(1)
+                elif self.were_in_checkpoints[-1] == int(MAPS['1']['checkpoints_num']):
+                    if checkpoint.sprite_type == '51': #finished lap!!! TODO: lap complision update
+                        self.were_in_checkpoints.clear()
+                else:
+                    if int(checkpoint.sprite_type) - 1 == self.were_in_checkpoints[-1]:
+                        self.were_in_checkpoints.append(int(checkpoint.sprite_type))
+
+
+
     def update(self):
 
         self.input()  # for the inputs
         self.collision() #for the collisions
+        self.checkpoints_collision()
         self.acceleration()  # for the car to gain speed
 
         self.traction()  # for the traction of the car
 
         #debug(str(self.moving_vector.x) + '  ,  ' + str(self.moving_vector.y) )
-        debug(self.on_grass)
+        debug(self.were_in_checkpoints)
         
 
 

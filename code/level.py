@@ -123,7 +123,7 @@ class Level:
 		self.car_prev_location = self.car.rect[0:2]
 
 	def create_map(self):
-		self.car = Car((1536, 832), [self.visible_sprites], self.obstacle_sprites, self.display_surface,180,self.checkpoint_sprites)
+		self.car = Car((2176, 1344), [self.visible_sprites], self.obstacle_sprites, self.display_surface,180,self.checkpoint_sprites)
 		self.car_prev_location = self.car.rect[0:2]
 		# Center camera
 		self.camera.x = self.car.rect.centerx
