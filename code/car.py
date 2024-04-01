@@ -59,7 +59,12 @@ class Car(pygame.sprite.Sprite):
         self.on_grass = False
         self.on_finish = False
 
+        #for the chackpoints and finish line
         self.were_in_checkpoints :int = []
+        self.lap_num = 0
+
+        #items
+        self.item_on = 'turtle'
 
 
     def input(self):
@@ -153,8 +158,9 @@ class Car(pygame.sprite.Sprite):
                     if checkpoint.sprite_type == '1':
                         self.were_in_checkpoints.append(1)
                 elif self.were_in_checkpoints[-1] == int(MAPS['1']['checkpoints_num']):
-                    if checkpoint.sprite_type == '51': #finished lap!!! TODO: lap complision update
+                    if checkpoint.sprite_type == '51': #finished lap!!!
                         self.were_in_checkpoints.clear()
+                        self.lap_num += 1
                 else:
                     if int(checkpoint.sprite_type) - 1 == self.were_in_checkpoints[-1]:
                         self.were_in_checkpoints.append(int(checkpoint.sprite_type))
@@ -171,7 +177,7 @@ class Car(pygame.sprite.Sprite):
         self.traction()  # for the traction of the car
 
         #debug(str(self.moving_vector.x) + '  ,  ' + str(self.moving_vector.y) )
-        debug(self.were_in_checkpoints)
+        #debug(self.were_in_checkpoints)
         
 
 

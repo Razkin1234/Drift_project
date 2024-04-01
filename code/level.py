@@ -6,6 +6,7 @@ from debug import debug
 from support import *
 from typing import List
 from YsortCameraGroup import *
+from ui import UI
 
 class Level:
 	def __init__(self):
@@ -18,6 +19,7 @@ class Level:
 		self.obstacle_sprites = YSortCameraGroup()
 		self.floor_sprites = YSortCameraGroup()
 		self.checkpoint_sprites = YSortCameraGroup()
+		self.item_sprites = YSortCameraGroup()
 
 		self.grass_numbers :int = [4,31,33,40,44] #all the grass numbers in the csv file
 
@@ -38,6 +40,9 @@ class Level:
 		# floor updating
 		self.car_move = [0, 0]
 		self.car_prev_location = self.car.rect[0:2]
+
+		#for the ui
+		self.ui = UI(self.item_sprites,self.car.lap_num)
 
 	def floor_update(self):
 
@@ -173,5 +178,9 @@ class Level:
 		self.visible_sprites.update()
 
 		self.floor_update()
+		self.car.item_on = self.ui.ui_update(self.car.lap_num,self.car.item_on)
+
+
+
 
 
