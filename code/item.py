@@ -10,4 +10,3 @@ class Item(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(topleft=pos)
         self.hitbox = self.rect.inflate(0, 0)  # if i want to overlap itemes
 
-

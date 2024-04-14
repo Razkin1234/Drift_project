@@ -34,8 +34,8 @@ item_list = ["banana", "turtle"]
 
 item_data = {
 	'box' : {'graphic' : '../graphics/items/box32.png'},
-	'banana' : {'graphic': '../graphics/items/banana.png' },
-	'turtle': {'graphic': '../graphics/items/turtle.png'}
+	'banana' : {'graphic': '../graphics/items/banana.png','icon':'../graphics/items/banana_icon.png' },
+	'turtle': {'graphic': '../graphics/items/turtle.png', 'icon':'../graphics/items/turtle_icon.png'}
 }
 
 

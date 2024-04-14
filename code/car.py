@@ -72,7 +72,14 @@ class Car(pygame.sprite.Sprite):
         self.lap_num = 0
 
         #items
-        self.item_on = 'turtle'
+        self.item_on = 'banana'
+        self.can_bump_items = True
+        self.can_bump_items_time = 0
+
+
+        self.can_move = True #if i can move
+        self.can_move_time = 0
+
 
 
     def input(self):
@@ -80,14 +87,15 @@ class Car(pygame.sprite.Sprite):
         pressed = keys = pygame.key.get_pressed()
 
         #forward and backwards:
-        if pressed[self.button_forward]:
-            self.speed += 0.85 / (self.speed + self.forward_acceleration) #the origin
-            #self.speed += 0.5
-        if pressed[self.button_backward]:
-            self.speed -= 0.85 / (abs(self.speed) + self.backward_acceleration)
-            self.reverse =True
-        elif self.reverse:
-            self.reverse = False #if not on reverse
+        if self.can_move: #if can _move is false, i wont be able to press the forward and backwards buttons
+            if pressed[self.button_forward]:
+                self.speed += 0.85 / (self.speed + self.forward_acceleration) #the origin
+                #self.speed += 0.5
+            if pressed[self.button_backward]:
+                self.speed -= 0.85 / (abs(self.speed) + self.backward_acceleration)
+                self.reverse =True
+            elif self.reverse:
+                self.reverse = False #if not on reverse
 
         #sideways:
         if pressed[self.button_left]:  # left turn
@@ -97,7 +105,10 @@ class Car(pygame.sprite.Sprite):
 
         if pressed[self.button_power]: #power
             if len(self.item_on)!=0:
-                #TODO: the item should do something
+                if self.item_on == 'banana':
+                    Item(self.rect.center, self.item_sprites, 'banana')
+                    self.can_bump_items = False #to not bump into my own banana imidiatly
+                    self.can_bump_items_time = pygame.time.get_ticks()
                 self.item_on = ''
 
 
@@ -179,7 +190,7 @@ class Car(pygame.sprite.Sprite):
                         self.were_in_checkpoints.append(int(checkpoint.sprite_type))
 
 
-    def item_picking(self):
+    def item_collision(self):
         copy_items = self.item_sprites.sprites().copy()
         for item in copy_items:
             if pygame.sprite.collide_mask(self, item):
@@ -191,6 +202,14 @@ class Car(pygame.sprite.Sprite):
                                 box_dict['is_on'] = False
                                 box_dict['time_off'] = pygame.time.get_ticks()
                                 item.kill()#remove the sprite
+                if item.sprite_type == 'banana' and self.can_bump_items:
+                    item.kill()
+                    #making the car stop
+                    self.speed = 0
+                    self.moving_vector.x = 0
+                    self.moving_vector.y = 0
+                    self.can_move = False
+                    self.can_move_time = pygame.time.get_ticks()
 
 
     def box_return(self):
@@ -201,6 +220,15 @@ class Car(pygame.sprite.Sprite):
                     Item(box_dict['location'], self.item_sprites, "box")  # box create
                     box_dict['is_on'] = True
 
+    def timer(self):
+        current_time = pygame.time.get_ticks()
+        if not self.can_bump_items:
+            if current_time - self.can_bump_items_time >= 500:
+                self.can_bump_items = True
+
+        if not self.can_move:
+            if current_time - self.can_move_time >= 1000: #how many time i cant move after a hit
+                self.can_move = True
 
 
     def update(self):
@@ -209,13 +237,15 @@ class Car(pygame.sprite.Sprite):
         self.collision() #for the collisions
         self.checkpoints_collision()
         self.acceleration()  # for the car to gain speed
-        self.item_picking() #for the items collision
+        self.item_collision() #for the items collision
         self.box_return() #for the boxes to be back after disappering
+        self.timer()
 
         self.traction()  # for the traction of the car
 
         #debug(str(self.moving_vector.x) + '  ,  ' + str(self.moving_vector.y) )
         #debug(self.were_in_checkpoints)
+        debug(self.can_bump_items)
         
 
 

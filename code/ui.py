@@ -34,7 +34,7 @@ class UI:
         pygame.draw.rect(self.display_surface, UI_BORDER_COLOR, bg_rect, 3)
 
         #the item
-        path = item_data[item_on]['graphic']
+        path = item_data[item_on]['icon']
         image = pygame.image.load(path).convert_alpha()
         item_surf = image
         item_rect = item_surf.get_rect(center=bg_rect.center)
