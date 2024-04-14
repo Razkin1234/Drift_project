@@ -24,7 +24,7 @@ ITEM_BOX_SIZE = 80
 
 #items:
 item_data = {
-	'box' : {'graphic' : '../graphics/items/box64.png'},
+	'box' : {'graphic' : '../graphics/items/box32.png'},
 	'banana' : {'graphic': '../graphics/items/banana.png' },
 	'turtle': {'graphic': '../graphics/items/turtle.png'}
 }

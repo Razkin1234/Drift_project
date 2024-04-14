@@ -7,6 +7,7 @@ from support import *
 from typing import List
 from YsortCameraGroup import *
 from ui import UI
+from item import Item
 
 class Level:
 	def __init__(self):
@@ -43,6 +44,8 @@ class Level:
 
 		#for the ui
 		self.ui = UI(self.item_sprites,self.car.lap_num)
+
+		self.item = Item
 
 	def floor_update(self):
 
@@ -134,6 +137,14 @@ class Level:
 		self.camera.x = self.car.rect.centerx
 		self.camera.y = self.car.rect.centery
 
+
+		#items creating:
+		Item((1872, 730), self.item_sprites, "box")  # item create
+		Item((1872, 782), self.item_sprites, "box")  # item create
+		Item((1872, 834), self.item_sprites, "box")  # item create
+		Item((1872, 886), self.item_sprites, "box")  # item create
+
+
 		#for printing around the player
 		car_tile: pygame.math.Vector2 = pygame.math.Vector2(int(self.car.rect.x / TILESIZE),
 															   int(self.car.rect.y / TILESIZE))
@@ -176,6 +187,9 @@ class Level:
 
 		self.visible_sprites.custom_draw(self.car)
 		self.visible_sprites.update()
+
+		self.item_sprites.custom_draw(self.car)
+		self.item_sprites.update()
 
 		self.floor_update()
 		self.car.item_on = self.ui.ui_update(self.car.lap_num,self.car.item_on)
