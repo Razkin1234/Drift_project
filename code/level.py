@@ -35,6 +35,13 @@ class Level:
 			#'checkpoints_num' : MAPS['1']['checkpoints_num']
 		}
 
+		self.boxes = {    #a dict for every box
+			'1' : {'location': (1872, 730) , 'is_on': True , 'time_off': 0.0},
+			'2': {'location': (1872, 782), 'is_on': True, 'time_off': 0.0},
+			'3': {'location': (1872, 834), 'is_on': True, 'time_off': 0.0},
+			'4': {'location': (1872, 886), 'is_on': True, 'time_off': 0.0}
+		}
+
 		#the map building
 		self.create_map()
 
@@ -131,7 +138,7 @@ class Level:
 		self.car_prev_location = self.car.rect[0:2]
 
 	def create_map(self):
-		self.car = Car((2176, 1344), [self.visible_sprites], self.obstacle_sprites, self.display_surface,180,self.checkpoint_sprites)
+		self.car = Car((2176, 1344), [self.visible_sprites], self.obstacle_sprites, self.display_surface,180,self.boxes ,self.checkpoint_sprites,self.item_sprites)
 		self.car_prev_location = self.car.rect[0:2]
 		# Center camera
 		self.camera.x = self.car.rect.centerx

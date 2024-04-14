@@ -23,11 +23,16 @@ ITEM_BOX_SIZE = 80
 
 
 #items:
+item_list = ["banana", "turtle"]
+
 item_data = {
 	'box' : {'graphic' : '../graphics/items/box32.png'},
 	'banana' : {'graphic': '../graphics/items/banana.png' },
 	'turtle': {'graphic': '../graphics/items/turtle.png'}
 }
+
+
+box_retime = 10000
 
 # general colors
 WATER_COLOR = '#71ddee'

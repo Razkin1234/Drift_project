@@ -1,12 +1,15 @@
 import math
+import random
+
 import pygame
 from settings import *
 from debug import debug
 import numpy
+from item import Item
 
 
 class Car(pygame.sprite.Sprite):
-    def __init__(self, pos ,groups, obstacle_sprites,display_surface,angle,checkpoint_sprites ):
+    def __init__(self, pos ,groups, obstacle_sprites,display_surface,angle,boxes,checkpoint_sprites,item_sprites ):
         super().__init__(groups)
         # drift_acceleration from 0.1 to 2, max_velocity should be less than 1.5
         pygame.sprite.Sprite.__init__(self)
@@ -14,6 +17,9 @@ class Car(pygame.sprite.Sprite):
         self.obstacle_sprites = obstacle_sprites
         self.checkpoint_sprites = checkpoint_sprites
         self.display_surface = display_surface
+        self.item_sprites = item_sprites
+
+        self.boxes = boxes #all the boxes list
 
         #for the moving:
         self.forward_acceleration = 1.5
@@ -36,6 +42,8 @@ class Car(pygame.sprite.Sprite):
         self.button_backward = pygame.K_DOWN
         self.button_right = pygame.K_RIGHT
         self.button_left = pygame.K_LEFT
+
+        self.button_power = pygame.K_SPACE
 
         #for the car image:
 
@@ -86,6 +94,11 @@ class Car(pygame.sprite.Sprite):
             self.turn_left(self.moving_vector.x, self.moving_vector.y)
         if pressed[self.button_right]:  # right turn
             self.turn_right(self.moving_vector.x, self.moving_vector.y)
+
+        if pressed[self.button_power]: #power
+            if len(self.item_on)!=0:
+                #TODO: the item should do something
+                self.item_on = ''
 
 
     def acceleration(self):
@@ -166,6 +179,29 @@ class Car(pygame.sprite.Sprite):
                         self.were_in_checkpoints.append(int(checkpoint.sprite_type))
 
 
+    def item_picking(self):
+        copy_items = self.item_sprites.sprites().copy()
+        for item in copy_items:
+            if pygame.sprite.collide_mask(self, item):
+                if item.sprite_type == 'box': #for the box collide
+                    if len(self.item_on) == 0: #if i got no items on
+                        self.item_on = random.choice(item_list)
+                        for box_name , box_dict in self.boxes.items():
+                            if item.rect[:2] == list(box_dict['location']):
+                                box_dict['is_on'] = False
+                                box_dict['time_off'] = pygame.time.get_ticks()
+                                item.kill()#remove the sprite
+
+
+    def box_return(self):
+        current_time = pygame.time.get_ticks()
+        for box_name, box_dict in self.boxes.items():
+            if box_dict['is_on'] == False:
+                if current_time - box_dict['time_off'] >= box_retime:
+                    Item(box_dict['location'], self.item_sprites, "box")  # box create
+                    box_dict['is_on'] = True
+
+
 
     def update(self):
 
@@ -173,6 +209,8 @@ class Car(pygame.sprite.Sprite):
         self.collision() #for the collisions
         self.checkpoints_collision()
         self.acceleration()  # for the car to gain speed
+        self.item_picking() #for the items collision
+        self.box_return() #for the boxes to be back after disappering
 
         self.traction()  # for the traction of the car
 
