@@ -35,12 +35,7 @@ class Level:
 			#'checkpoints_num' : MAPS['1']['checkpoints_num']
 		}
 
-		self.boxes = {    #a dict for every box
-			'1' : {'location': (1872, 730) , 'is_on': True , 'time_off': 0.0},
-			'2': {'location': (1872, 782), 'is_on': True, 'time_off': 0.0},
-			'3': {'location': (1872, 834), 'is_on': True, 'time_off': 0.0},
-			'4': {'location': (1872, 886), 'is_on': True, 'time_off': 0.0}
-		}
+		self.boxes = MAPS['1']['boxes']
 
 		#the map building
 		self.create_map()
@@ -144,12 +139,10 @@ class Level:
 		self.camera.x = self.car.rect.centerx
 		self.camera.y = self.car.rect.centery
 
-
-		#items creating:
-		Item((1872, 730), self.item_sprites, "box")  # item create
-		Item((1872, 782), self.item_sprites, "box")  # item create
-		Item((1872, 834), self.item_sprites, "box")  # item create
-		Item((1872, 886), self.item_sprites, "box")  # item create
+		#box creating
+		for box , values in self.boxes.items():
+			Item(values['location'], self.item_sprites, "box")  # item create
+			values['is_on'] = True
 
 
 		#for printing around the player
