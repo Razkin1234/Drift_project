@@ -6,6 +6,7 @@ from settings import *
 from debug import debug
 import numpy
 from item import Item
+from turtle import Turlte
 
 
 class Car(pygame.sprite.Sprite):
@@ -57,7 +58,7 @@ class Car(pygame.sprite.Sprite):
         self.angle = angle
         self.image = pygame.transform.rotate(self.original_image, self.angle) #that the car will start facing its angle
         self.speed = 0 #speed
-        
+
         self.moving_vector = pygame.Vector2() #the vector of moving
 
         self.moving_vector.x = 0 #the chage of angle
@@ -109,6 +110,8 @@ class Car(pygame.sprite.Sprite):
                     Item(self.rect.center, self.item_sprites, 'banana')
                     self.can_bump_items = False #to not bump into my own banana imidiatly
                     self.can_bump_items_time = pygame.time.get_ticks()
+                # if self.item_on == 'turtle':
+                #     Turlte(self.rect.center,self.item_sprites,'turtle',self.angle)
                 self.item_on = ''
 
 
