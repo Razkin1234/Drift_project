@@ -152,7 +152,6 @@ class Level:
 			for row_index in range(int(car_tile.y - ROW_LOAD_TILE_DISTANCE),
                                    int(car_tile.y + ROW_LOAD_TILE_DISTANCE)):
 				if 0 <= row_index < ROW_TILES:
-					print(row_index)
 					row = layout[row_index]
 					for col_index in range(int(car_tile.x - COL_LOAD_TILE_DISTANCE),
 										   int(car_tile.x + COL_LOAD_TILE_DISTANCE)):
@@ -193,6 +192,15 @@ class Level:
 
 		self.floor_update()
 		self.car.item_on = self.ui.ui_update(self.car.lap_num,self.car.item_on)
+
+		#turtle move!!1
+		for item in self.item_sprites:
+			if item.sprite_type == 'turtle':
+				item.move()
+
+
+
+
 
 
 

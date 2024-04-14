@@ -73,7 +73,7 @@ class Car(pygame.sprite.Sprite):
         self.lap_num = 0
 
         #items
-        self.item_on = 'banana'
+        self.item_on = 'turtle'
         self.can_bump_items = True
         self.can_bump_items_time = 0
 
@@ -110,8 +110,10 @@ class Car(pygame.sprite.Sprite):
                     Item(self.rect.center, self.item_sprites, 'banana')
                     self.can_bump_items = False #to not bump into my own banana imidiatly
                     self.can_bump_items_time = pygame.time.get_ticks()
-                # if self.item_on == 'turtle':
-                #     Turlte(self.rect.center,self.item_sprites,'turtle',self.angle)
+                if self.item_on == 'turtle':
+                    Turlte(self.rect.center,self.item_sprites,'turtle',self.angle)
+                    self.can_bump_items = False  # to not bump into my own banana imidiatly
+                    self.can_bump_items_time = pygame.time.get_ticks()
                 self.item_on = ''
 
 
@@ -205,7 +207,7 @@ class Car(pygame.sprite.Sprite):
                                 box_dict['is_on'] = False
                                 box_dict['time_off'] = pygame.time.get_ticks()
                                 item.kill()#remove the sprite
-                if item.sprite_type == 'banana' and self.can_bump_items:
+                if (item.sprite_type == 'banana' or item.sprite_type == 'turtle') and self.can_bump_items:
                     item.kill()
                     #making the car stop
                     self.speed = 0
@@ -248,7 +250,7 @@ class Car(pygame.sprite.Sprite):
 
         #debug(str(self.moving_vector.x) + '  ,  ' + str(self.moving_vector.y) )
         #debug(self.were_in_checkpoints)
-        debug(self.can_bump_items)
+
         
 
 
