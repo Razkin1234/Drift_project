@@ -11,7 +11,7 @@ class Turlte(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(topleft=pos)
         self.hitbox = self.rect.inflate(0, 0)  # if i want to overlap itemes
         self.angle = angle
-        self.vector = pygame.math.Vector2(self.vector_culc()).normalize() * 8 #the vector times the speed
+        self.vector = pygame.math.Vector2(self.vector_culc()).normalize() * 10 #the vector times the speed
 
 
         self.creation_time = pygame.time.get_ticks() #the time of the turtle criation

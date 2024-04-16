@@ -48,7 +48,7 @@ class Car(pygame.sprite.Sprite):
 
         #for the car image:
 
-        self.original_image = pygame.image.load('../graphics/car.png').convert_alpha() #the car image
+        self.original_image = pygame.image.load('../graphics/cars/army_track.png').convert_alpha() #the car image
         self.image = self.original_image
         self.rect = self.image.get_rect(topleft=pos)
         self.real_x = pos[0]
