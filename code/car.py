@@ -7,6 +7,7 @@ from debug import debug
 import numpy
 from item import Item
 from turtle import Turlte
+from other_cars import Other_cars
 
 
 class Car(pygame.sprite.Sprite):
@@ -48,7 +49,7 @@ class Car(pygame.sprite.Sprite):
 
         #for the car image:
 
-        self.original_image = pygame.image.load('../graphics/cars/army_track.png').convert_alpha() #the car image
+        self.original_image = pygame.image.load('../graphics/cars/formula_pink.png').convert_alpha() #the car image
         self.image = self.original_image
         self.rect = self.image.get_rect(topleft=pos)
         self.real_x = pos[0]
@@ -80,6 +81,9 @@ class Car(pygame.sprite.Sprite):
 
         self.can_move = True #if i can move
         self.can_move_time = 0
+
+        #for the sending:
+        self.car_to_send = Other_cars('own_car',self.rect,self.angle,'army_track.png')
 
 
 
@@ -248,8 +252,7 @@ class Car(pygame.sprite.Sprite):
 
         self.traction()  # for the traction of the car
 
-        #debug(str(self.moving_vector.x) + '  ,  ' + str(self.moving_vector.y) )
-        #debug(self.were_in_checkpoints)
+        self.car_to_send.update_own_data(self.rect,self.angle)
 
         
 

@@ -1,8 +1,9 @@
 import socket
 from _thread import *
-import sys
+from other_cars import Other_cars
+import pickle
 
-server = "10.0.0.29"
+server = "10.0.0.33"
 port = 5555
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -15,37 +16,30 @@ except socket.error as e:
 s.listen(2)
 print("Waiting for a connection, Server Started")
 
-def read_pos(str):
-    str = str.split(",")
-    return int(str[0]), int(str[1])
 
-
-def make_pos(tup):
-    return str(tup[0]) + "," + str(tup[1])
-
-pos = [(0,0),(100,100)]
+cars = [Other_cars('car_1',(2176, 1344),180,'tank.png'),Other_cars('car_1',(2176, 1344),180,'tank.png')] #all of the cars
 
 def threaded_client(conn, player):
-    conn.send(str.encode(make_pos(pos[player])))
+    conn.send(pickle.dumps(cars[player]))
     reply = ""
     while True:
         try:
-            data = read_pos(conn.recv(2048).decode())
-            pos[player] = data
+            data = pickle.loads(conn.recv(2048))
+            cars[player] = data
 
             if not data:
                 print("Disconnected")
                 break
             else:
                 if player == 1:
-                    reply = pos[0]
+                    reply = cars[0]
                 else:
-                    reply = pos[1]
+                    reply = cars[1]
 
                 print("Received: ", data)
                 print("Sending : ", reply)
 
-            conn.sendall(str.encode(make_pos(reply)))
+            conn.sendall(pickle.dumps(reply))
         except:
             break
 
