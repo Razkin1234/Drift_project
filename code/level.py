@@ -9,6 +9,8 @@ from YsortCameraGroup import *
 from ui import UI
 from item import Item
 
+from network import Network
+
 class Level:
 	def __init__(self):
 
@@ -37,6 +39,9 @@ class Level:
 
 		self.boxes = MAPS['1']['boxes']
 
+		#for the online:
+		self.network = Network()
+
 		#the map building
 		self.create_map()
 
@@ -48,6 +53,52 @@ class Level:
 		self.ui = UI(self.item_sprites,self.car.lap_num)
 
 		self.item = Item
+
+
+
+	def create_map(self):
+		self.car = Car((self.network.getP().pos[:2]), [self.visible_sprites], self.obstacle_sprites, self.display_surface,self.network.getP().angle,self.boxes ,self.checkpoint_sprites,self.item_sprites,self.network.getP())
+
+		self.car_prev_location = self.car.rect[0:2]
+		# Center camera
+		self.camera.x = self.car.rect.centerx
+		self.camera.y = self.car.rect.centery
+
+		#box creating
+		for box , values in self.boxes.items():
+			Item(values['location'], self.item_sprites, "box")  # item create
+			values['is_on'] = True
+
+
+		#for printing around the player
+		car_tile: pygame.math.Vector2 = pygame.math.Vector2(int(self.car.rect.x / TILESIZE),
+															int(self.car.rect.y / TILESIZE))
+		for style, layout in self.layout.items():
+			for row_index in range(int(car_tile.y - ROW_LOAD_TILE_DISTANCE),
+								   int(car_tile.y + ROW_LOAD_TILE_DISTANCE)):
+				if 0 <= row_index < ROW_TILES:
+					row = layout[row_index]
+					for col_index in range(int(car_tile.x - COL_LOAD_TILE_DISTANCE),
+										   int(car_tile.x + COL_LOAD_TILE_DISTANCE)):
+						if 0 <= col_index < COL_TILES:
+							col = row[col_index]
+						if col != '-1':
+							x = col_index * TILESIZE
+							y = row_index * TILESIZE
+
+							if style == 'floor':
+								tile_path = f'../graphics/tileparts/{col}.png'
+								image_surf = pygame.image.load(tile_path).convert_alpha()
+								if int(col) in self.grass_numbers:
+									Tile((x, y), [self.floor_sprites,self.obstacle_sprites], 'grass', image_surf)
+								else:
+									Tile((x, y), [self.floor_sprites], 'floor', image_surf)
+							elif style == 'checkpoints':
+								tile_path = f'../graphics/tileparts/checkpoint.png'
+								image_surf = pygame.image.load(tile_path).convert_alpha()
+								Tile((x, y), [self.checkpoint_sprites], f'{col}', image_surf) #the checkpoint type will be his number (51 for finish line)
+							else:
+								pass
 
 	def floor_update(self):
 
@@ -132,48 +183,7 @@ class Level:
 
 		self.car_prev_location = self.car.rect[0:2]
 
-	def create_map(self):
-		self.car = Car((2176, 1344), [self.visible_sprites], self.obstacle_sprites, self.display_surface,180,self.boxes ,self.checkpoint_sprites,self.item_sprites)
-		self.car_prev_location = self.car.rect[0:2]
-		# Center camera
-		self.camera.x = self.car.rect.centerx
-		self.camera.y = self.car.rect.centery
 
-		#box creating
-		for box , values in self.boxes.items():
-			Item(values['location'], self.item_sprites, "box")  # item create
-			values['is_on'] = True
-
-
-		#for printing around the player
-		car_tile: pygame.math.Vector2 = pygame.math.Vector2(int(self.car.rect.x / TILESIZE),
-															   int(self.car.rect.y / TILESIZE))
-		for style, layout in self.layout.items():
-			for row_index in range(int(car_tile.y - ROW_LOAD_TILE_DISTANCE),
-                                   int(car_tile.y + ROW_LOAD_TILE_DISTANCE)):
-				if 0 <= row_index < ROW_TILES:
-					row = layout[row_index]
-					for col_index in range(int(car_tile.x - COL_LOAD_TILE_DISTANCE),
-										   int(car_tile.x + COL_LOAD_TILE_DISTANCE)):
-						if 0 <= col_index < COL_TILES:
-							col = row[col_index]
-						if col != '-1':
-							x = col_index * TILESIZE
-							y = row_index * TILESIZE
-
-							if style == 'floor':
-								tile_path = f'../graphics/tileparts/{col}.png'
-								image_surf = pygame.image.load(tile_path).convert_alpha()
-								if int(col) in self.grass_numbers:
-									Tile((x, y), [self.floor_sprites,self.obstacle_sprites], 'grass', image_surf)
-								else:
-									Tile((x, y), [self.floor_sprites], 'floor', image_surf)
-							elif style == 'checkpoints':
-								tile_path = f'../graphics/tileparts/checkpoint.png'
-								image_surf = pygame.image.load(tile_path).convert_alpha()
-								Tile((x, y), [self.checkpoint_sprites], f'{col}', image_surf) #the checkpoint type will be his number (51 for finish line)
-							else:
-								pass
 
 	def run(self):
 		# update and draw the game
@@ -197,6 +207,12 @@ class Level:
 		for item in self.item_sprites:
 			if item.sprite_type == 'turtle':
 				item.move()
+
+		p2 = self.network.send(self.car.car_to_send)
+		p2.blit_other_car(self.car.rect,self.display_surface)
+
+
+
 
 
 

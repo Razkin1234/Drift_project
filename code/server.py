@@ -1,12 +1,15 @@
 import socket
 from _thread import *
 from other_cars import Other_cars
+from YsortCameraGroup import *
 import pickle
+import traceback
 
 server = "10.0.0.33"
 port = 5555
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
 
 try:
     s.bind((server, port))
@@ -16,10 +19,10 @@ except socket.error as e:
 s.listen(2)
 print("Waiting for a connection, Server Started")
 
-
-cars = [Other_cars('car_1',(2176, 1344),180,'tank.png'),Other_cars('car_1',(2176, 1344),180,'tank.png')] #all of the cars
+cars = [Other_cars('car_1',(2176, 1344),180,'tank.png'),Other_cars('car_2',(2176, 1344),180,'tank.png')] #all of the cars
 
 def threaded_client(conn, player):
+    print('player: '+ str(player))
     conn.send(pickle.dumps(cars[player]))
     reply = ""
     while True:
@@ -36,12 +39,15 @@ def threaded_client(conn, player):
                 else:
                     reply = cars[1]
 
-                print("Received: ", data)
-                print("Sending : ", reply)
+                print("Received: ", str(data))
+                print("Sending : ", str(reply))
 
             conn.sendall(pickle.dumps(reply))
-        except:
+        except pickle.UnpicklingError as e:
+            print("Error while unpickling:", e)
+            #traceback.print_exc()  # Print traceback for debugging
             break
+
 
     print("Lost connection")
     conn.close()

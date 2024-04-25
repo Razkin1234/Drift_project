@@ -11,7 +11,7 @@ from other_cars import Other_cars
 
 
 class Car(pygame.sprite.Sprite):
-    def __init__(self, pos ,groups, obstacle_sprites,display_surface,angle,boxes,checkpoint_sprites,item_sprites ):
+    def __init__(self, pos ,groups, obstacle_sprites,display_surface,angle,boxes,checkpoint_sprites,item_sprites,car_to_send ):
         super().__init__(groups)
         # drift_acceleration from 0.1 to 2, max_velocity should be less than 1.5
         pygame.sprite.Sprite.__init__(self)
@@ -83,7 +83,7 @@ class Car(pygame.sprite.Sprite):
         self.can_move_time = 0
 
         #for the sending:
-        self.car_to_send = Other_cars('own_car',self.rect,self.angle,'army_track.png')
+        self.car_to_send = car_to_send
 
 
 
