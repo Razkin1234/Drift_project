@@ -54,6 +54,8 @@ class Level:
 
 		self.item = Item
 
+		self.other_cars = []
+
 
 
 	def create_map(self):
@@ -208,8 +210,11 @@ class Level:
 			if item.sprite_type == 'turtle':
 				item.move()
 
-		p2 = self.network.send(self.car.car_to_send)
-		p2.blit_other_car(self.car.rect,self.display_surface)
+		cars = self.network.send(self.car.car_to_send)
+		if len(cars) != 0:
+			#cars[0].blit_other_car(self.car.rect,self.display_surface)
+			for other_car in cars:
+				other_car.blit_other_car(self.car.rect,self.display_surface)
 
 
 

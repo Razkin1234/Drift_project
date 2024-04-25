@@ -49,7 +49,9 @@ class Car(pygame.sprite.Sprite):
 
         #for the car image:
 
-        self.original_image = pygame.image.load('../graphics/cars/formula_pink.png').convert_alpha() #the car image
+        self.car_skin = 'formula_pink.png'
+
+        self.original_image = pygame.image.load(f'../graphics/cars/{self.car_skin}').convert_alpha() #the car image
         self.image = self.original_image
         self.rect = self.image.get_rect(topleft=pos)
         self.real_x = pos[0]

@@ -18,6 +18,9 @@ class Other_cars(pygame.sprite.Sprite):
         self.pos = pos
         self.angle = angle
 
+    def update_car_skin(self,car_skin):
+        self.car_skin = car_skin
+
     def blit_other_car(self, rect , screen):
 
         self.original_image = pygame.image.load(f'../graphics/cars/{self.car_skin}').convert_alpha()  # the car image
