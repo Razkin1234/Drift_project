@@ -20,9 +20,16 @@ class Network:
         except:
             pass
 
-    def send(self, data):
+    def send_car(self, data):
+        """
+         for sending the car info to the server
+        :param data (the car we want to send):
+        :return: all the other cars from the server in a list
+        """
+
         try:
-            self.client.send(pickle.dumps(data))
+            to_send = f"car_send-{pickle.dumps(data).decode('latin1')}"
+            self.client.send(to_send.encode())
             return pickle.loads(self.client.recv(2048))
         except socket.error as e:
             print(e)

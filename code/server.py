@@ -19,10 +19,10 @@ except socket.error as e:
 s.listen(4)
 print("Waiting for a connection, Server Started")
 
-cars = {'0': {'object': Other_cars('1',(2176, 1344),180,'tank.png'), 'played': False},
-        '1': {'object': Other_cars('2',(2176, 1344),180,'taxi.png'), 'played': False},
-        '2': {'object': Other_cars('3',(2176, 1344),180,'batmobile.png'), 'played': False},
-        '3': {'object': Other_cars('4',(2176, 1344),180,'orange_car.png'), 'played': False}} #all of the cars
+cars = {'0': {'object': Other_cars('1',(2176, 1344),180,'tank.png'),'round': 0 ,'played': False},
+        '1': {'object': Other_cars('2',(2176, 1344),180,'taxi.png'),'round': 0 , 'played': False},
+        '2': {'object': Other_cars('3',(2176, 1344),180,'batmobile.png'),'round': 0 , 'played': False},
+        '3': {'object': Other_cars('4',(2176, 1344),180,'orange_car.png'),'round': 0 , 'played': False}} #all of the cars
 
 def threaded_client(conn, player):
     print('player: '+ str(player))
@@ -31,22 +31,27 @@ def threaded_client(conn, player):
     reply = ""
     while True:
         try:
-            data = pickle.loads(conn.recv(2048))
-            cars[str(player)]['object'] = data
+            received = conn.recv(2048).decode()
+            parts = received.split("-", 1)  # Split at the first occurrence of "-"
+            if len(parts) == 2 and parts[0] == 'car_send':
+                pickled_obj = parts[1].encode('latin1')
+                data = pickle.loads(pickled_obj)
 
-            if not data:
-                print("Disconnected")
-                break
-            else:
-                reply = []
-                for name , dict_inside in cars.items():
-                    if dict_inside['played'] and player != int(name):
-                        reply.append(dict_inside['object'])
+                cars[str(player)]['object'] = data
 
-                print("Received: ", str(data))
-                print("Sending : ", str(reply))
+                if not data:
+                    print("Disconnected")
+                    break
+                else:
+                    reply = []
+                    for name , dict_inside in cars.items():
+                        if dict_inside['played'] and player != int(name):
+                            reply.append(dict_inside['object'])
 
-            conn.sendall(pickle.dumps(reply))
+                    print("Received: ", str(data))
+                    print("Sending : ", str(reply))
+
+                conn.sendall(pickle.dumps(reply))
         except pickle.UnpicklingError as e:
             print("Error while unpickling:", e)
             #traceback.print_exc()  # Print traceback for debugging

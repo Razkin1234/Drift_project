@@ -210,7 +210,7 @@ class Level:
 			if item.sprite_type == 'turtle':
 				item.move()
 
-		cars = self.network.send(self.car.car_to_send)
+		cars = self.network.send_car(self.car.car_to_send)
 		if len(cars) != 0:
 			#cars[0].blit_other_car(self.car.rect,self.display_surface)
 			for other_car in cars:
