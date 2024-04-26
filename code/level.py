@@ -13,10 +13,12 @@ from _thread import *
 
 
 class Level:
-	def __init__(self,network):
+	def __init__(self,network,car_skin):
 
 		# get the display surface / the screen
 		self.display_surface = pygame.display.get_surface()
+
+		self.car_skin = car_skin #for the skin of the car
 
 		# sprite group setup
 		self.visible_sprites = YSortCameraGroup()
@@ -60,7 +62,7 @@ class Level:
 
 
 	def create_map(self):
-		self.car = Car((self.network.getP().pos[:2]), [self.visible_sprites], self.obstacle_sprites, self.display_surface,self.network.getP().angle,self.boxes ,self.checkpoint_sprites,self.item_sprites,self.network.getP(),self.network)
+		self.car = Car((self.network.getP().pos[:2]), [self.visible_sprites], self.obstacle_sprites, self.display_surface,self.network.getP().angle,self.boxes ,self.checkpoint_sprites,self.item_sprites,self.network.getP(),self.network,self.car_skin)
 
 		self.car_prev_location = self.car.rect[0:2]
 		# Center camera

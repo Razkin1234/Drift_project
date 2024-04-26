@@ -11,7 +11,7 @@ from other_cars import Other_cars
 
 
 class Car(pygame.sprite.Sprite):
-    def __init__(self, pos ,groups, obstacle_sprites,display_surface,angle,boxes,checkpoint_sprites,item_sprites,car_to_send,network):
+    def __init__(self, pos ,groups, obstacle_sprites,display_surface,angle,boxes,checkpoint_sprites,item_sprites,car_to_send,network,car_skin):
         super().__init__(groups)
         # drift_acceleration from 0.1 to 2, max_velocity should be less than 1.5
         pygame.sprite.Sprite.__init__(self)
@@ -51,7 +51,7 @@ class Car(pygame.sprite.Sprite):
 
         #for the car image:
 
-        self.car_skin = 'formula_pink.png'
+        self.car_skin = car_skin
 
         self.original_image = pygame.image.load(f'../graphics/cars/{self.car_skin}').convert_alpha() #the car image
         self.image = self.original_image
