@@ -1,6 +1,7 @@
 import socket
 import pickle
 import traceback
+import ast
 
 
 class Network:
@@ -10,7 +11,7 @@ class Network:
         self.server = "10.0.0.33"
         self.port = 5555
         self.addr = (self.server, self.port)
-        self.p = self.connect()
+        self.p , self.player = self.connect()
 
     def getP(self):
         return self.p
@@ -18,7 +19,15 @@ class Network:
     def connect(self):
         try:
             self.client.connect(self.addr)
-            return pickle.loads(self.client.recv(2048))
+
+            #this is what i get back: f"kirmul~{player}~{pickle.dumps(cars[str(player)]['object']).decode('latin1')}"
+            received = self.client.recv(2048).decode()
+            parts = received.split('~')
+            if parts[0] == 'kirmul':
+                player = parts[1]
+                pickled_obj = parts[2].encode('latin1')
+                car = pickle.loads(pickled_obj)
+            return car,player
         except:
             pass
 
@@ -52,13 +61,18 @@ class Network:
             self.client.send(to_send.encode())
 
 
+    def delete_item_send(self,item_name): #for the item delete
+        to_send = f"kirmul~item_delete~name;{item_name}"
+        self.client.send(to_send.encode())
+
+
     def get_info(self,display_surface,level):
         try:
             received = self.client.recv(2048).decode()
             received = received.split("*",1)  # Split at the first occurrence of "~"
             parts = received[0].split("~",1)  # Split at the first occurrence of "~"
             if parts[0] == 'kirmul':
-                parts = parts[1].split("~",1)
+                parts = parts[1].split("~",1)   #parts[0] = type  parts[1] = everything else
                 if parts[0] == 'car_send':  #for car location update
                     pickled_obj = parts[1].encode('latin1')
                     cars = pickle.loads(pickled_obj)
@@ -91,20 +105,28 @@ class Network:
                                     if item_info[1] == 'banana':  # for banana items
                                         item_info = parts[2].split(";", 1)  # pos    ,     the pos
                                         if item_info[0] == 'pos':
-                                            level.car.create_banana(item_info[1]) #create a banana
-                                            new_dict = {'type': 'banana', 'pos': item_info[1]}
+                                            pos = ast.literal_eval(item_info[1])
+                                            level.car.create_banana(pos,item_name) #create a banana
+                                            new_dict = {'type': 'banana', 'pos': pos}
                                             level.car.items[str(item_name)] = new_dict
 
                                     elif item_info[1] == 'turtle':
                                         pos = (2176, 1344) #just for warning, means nothing
                                         item_info = parts[2].split(";", 1)  # pos    ,     the pos
                                         if item_info[0] == 'pos':
-                                            pos = item_info[1]
+                                            pos = ast.literal_eval(item_info[1])
                                         item_info = parts[3].split(";", 1)  # pos    ,     the pos
                                         if item_info[0] == 'angle':
                                             new_dict = {'type': 'turtle' , 'pos': pos}
                                             level.car.items[str(item_name)] = new_dict
-                                            level.car.create_turtle(pos,int(item_info[1])) #adding the item to the dict
+                                            level.car.create_turtle(pos,int(item_info[1]),item_name) #adding the item to the dict
+                elif parts[0] == 'delete_item':    #parts[0] = type  parts[1] = everything else
+                    item_info = parts[1].split(';',1)
+                    c_items = level.item_sprites.sprites().copy()
+                    for item in c_items:
+                        if item.name == item_info[1]:
+                            item.kill()#killing the sprite
+
                 else:
                     print(received)
             else:

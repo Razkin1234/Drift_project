@@ -78,7 +78,7 @@ class Car(pygame.sprite.Sprite):
         self.lap_num = 0
 
         #items
-        self.item_on = 'banana'
+        self.item_on = 'turtle'
         self.can_bump_items = True
         self.can_bump_items_time = 0
 
@@ -90,17 +90,15 @@ class Car(pygame.sprite.Sprite):
         self.car_to_send = car_to_send
 
         self.items = {}
+        self.item_num = 0 #for tracking the item
+        self.player = self.network.player #the number of the player in the server
 
-
-    def create_turtle(self,rect,angle):
-        result_tuple = ast.literal_eval(rect)
-        Turlte(result_tuple, self.item_sprites, 'turtle', angle)
+    def create_turtle(self,rect,angle,item_name):
+        Turlte(rect, self.item_sprites, 'turtle', angle,item_name)
         print('created a turtle')
-        #Turlte(self.rect.center, self.item_sprites, 'turtle', self.angle)
 
-    def create_banana(self,rect):
-        result_tuple = ast.literal_eval(rect)
-        Item(result_tuple, self.item_sprites, 'banana')
+    def create_banana(self,rect,item_name):
+        Item(rect, self.item_sprites, 'banana',item_name)
         print('created a banana')
 
     def input(self):
@@ -127,12 +125,16 @@ class Car(pygame.sprite.Sprite):
         if pressed[self.button_power]: #power
             if len(self.item_on)!=0:
                 if self.item_on == 'banana':
-                    new_i = Item(self.rect.center, self.item_sprites, 'banana')
+                    name = f'p{self.player}i{self.item_num}'
+                    self.item_num += 1
+                    new_i = Item(self.rect.center, self.item_sprites, 'banana',name)
                     self.network.send_item(new_i) #for the server update
                     self.can_bump_items = False #to not bump into my own banana imidiatly
                     self.can_bump_items_time = pygame.time.get_ticks()
                 if self.item_on == 'turtle':
-                    new_t = Turlte(self.rect.center,self.item_sprites,'turtle',self.angle)
+                    name = f'p{self.player}i{self.item_num}'
+                    self.item_num += 1
+                    new_t = Turlte(self.rect.center,self.item_sprites,'turtle',self.angle,name)
                     self.network.send_item(new_t)#for the server update
                     self.can_bump_items = False  # to not bump into my own banana imidiatly
                     self.can_bump_items_time = pygame.time.get_ticks()
@@ -233,6 +235,13 @@ class Car(pygame.sprite.Sprite):
                                 box_dict['time_off'] = pygame.time.get_ticks()
                                 item.kill()#remove the sprite
                 if (item.sprite_type == 'banana' or item.sprite_type == 'turtle') and self.can_bump_items:
+                    name = item.name
+                    c_items = self.items.copy()
+                    for key_names in c_items: #for the server to delete the item for everyone
+                        if name == key_names:
+                            self.network.delete_item_send(key_names)
+                            del self.items[key_names]
+
                     item.kill()
                     #making the car stop
                     self.speed = 0

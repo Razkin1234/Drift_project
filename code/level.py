@@ -69,7 +69,7 @@ class Level:
 
 		#box creating
 		for box , values in self.boxes.items():
-			Item(values['location'], self.item_sprites, "box")  # item create
+			Item(values['location'], self.item_sprites, "box",'efi')  # item create
 			values['is_on'] = True
 
 

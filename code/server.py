@@ -26,12 +26,19 @@ cars = {'0': {'object': Other_cars('1',(2176, 1344),180,'tank.png'),'round': 0 ,
         '3': {'object': Other_cars('4',(2176, 1344),180,'orange_car.png'),'round': 0 , 'played': False}} #all of the cars
 #'type':   ,'pos':  ,'havesendto': (the players that got the item in an array),'angle'(for turtle type only):
 
-#'example':{'type': 'turtle','pos': (1180,789,40,40),'angle': (1.12,-0.98) ,'havesendto':[1]}
+#'example':{'type': 'turtle','pos': (1180,789,40,40),'angle': (1.12,-0.98) ,'havesendto':[1],'create_time': pygame.time.getticks()}
 items = {}
+delete_items = {}
 
 def threaded_client(conn, player):
     print('player: '+ str(player))
-    conn.send(pickle.dumps(cars[str(player)]['object'])) #sending back the object
+    #conn.send(pickle.dumps(cars[str(player)]['object'])) #sending back the object
+
+    to_send = f"kirmul~{player}~{pickle.dumps(cars[str(player)]['object']).decode('latin1')}"
+    conn.send(to_send.encode())  # the car send
+
+
+
     cars[str(player)]['played'] = True #updating that there is a player for this car
     reply = ""
     item_num = 0 #for the items naming
@@ -41,6 +48,10 @@ def threaded_client(conn, player):
         for item_name , item_dict in c_items.items():
             if current_time - item_dict['create_time'] >= 100:
                 del items[item_name]
+        c_items = delete_items.copy()
+        for item_name , item_dict in c_items.items():
+            if current_time - item_dict['create_time'] >= 100:
+                del delete_items[item_name]
 
 
         try:
@@ -88,6 +99,16 @@ def threaded_client(conn, player):
                     cars[str(player)]['played'] = False
                     print(f'player {player} has disconnected')
                     break
+                elif parts[0] == 'item_delete':    #"kirmul~item_delete~name;{item_name}"
+                    item_info = parts[1].split(';')
+                    name = item_info[1]
+                    if name in items:#removing the item
+                        del items[name]
+                    new_dict = {'create_time': pygame.time.get_ticks(),'havesendto':[player]}
+                    delete_items[name] = new_dict
+
+
+
         except pickle.UnpicklingError as e:
             print("Error while unpickling:", e)
             traceback.print_exc()  # Print traceback for debugging
@@ -106,6 +127,13 @@ def threaded_client(conn, player):
                         to_send = f"kirmul~item_send~name;{name}^type;{dict_inside['type']}^pos;{dict_inside['pos']}^angle;{dict_inside['angle']}*nothing"
                         print(f"sending {player}:  {to_send}")
                         conn.sendall(to_send.encode())
+
+            #to delete items:
+            c_items = delete_items.copy()
+            for name, dict_inside in c_items.items():
+                if player not in dict_inside['havesendto']:
+                    to_send = f"kirmul~delete_item~name;{name}*nothing"
+                    conn.sendall(to_send.encode())  # the car send
 
             ###cars update sending
             cars_to_send = []
