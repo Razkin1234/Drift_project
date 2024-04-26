@@ -98,6 +98,11 @@ class Car(pygame.sprite.Sprite):
         print('created a turtle')
         #Turlte(self.rect.center, self.item_sprites, 'turtle', self.angle)
 
+    def create_banana(self,rect):
+        result_tuple = ast.literal_eval(rect)
+        Item(result_tuple, self.item_sprites, 'banana')
+        print('created a banana')
+
     def input(self):
 
         pressed = keys = pygame.key.get_pressed()

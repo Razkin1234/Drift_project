@@ -48,7 +48,7 @@ class Network:
             to_send = f"kirmul~item_send~type;{item_data.sprite_type}^pos;{item_data.rect.center}^angle;{item_data.angle}"
             self.client.send(to_send.encode())
         else:
-            to_send = f"kirmul~item_send~type;{item_data.sprite_type}>pos;{item_data.rect.center}"
+            to_send = f"kirmul~item_send~type;{item_data.sprite_type}^pos;{item_data.rect.center}"
             self.client.send(to_send.encode())
 
 
@@ -91,8 +91,10 @@ class Network:
                                     if item_info[1] == 'banana':  # for banana items
                                         item_info = parts[2].split(";", 1)  # pos    ,     the pos
                                         if item_info[0] == 'pos':
-                                            print(parts)
-                                            print(item_info)
+                                            level.car.create_banana(item_info[1]) #create a banana
+                                            new_dict = {'type': 'banana', 'pos': item_info[1]}
+                                            level.car.items[str(item_name)] = new_dict
+
                                     elif item_info[1] == 'turtle':
                                         pos = (2176, 1344) #just for warning, means nothing
                                         item_info = parts[2].split(";", 1)  # pos    ,     the pos

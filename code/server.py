@@ -63,6 +63,7 @@ def threaded_client(conn, player):
                          #print("Received: ", str(data))
                         pass
                 elif parts[0] == 'item_send':
+                    print(parts[1])
                     #type;{dict_inside['type']}^pos;{dict_inside['pos']}
                     parts = parts[1].split("^")             #type;{dict_inside['type']}   ,     pos;{dict_inside['pos']}    ,    angle; the angle
                     item_info = parts[0].split(";",1)         #type   ,   the type
