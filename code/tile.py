@@ -13,3 +13,4 @@ class Tile(pygame.sprite.Sprite):
 		else:
 			self.hitbox = self.rect.inflate(0,0)
 
+

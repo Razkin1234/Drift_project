@@ -4,6 +4,7 @@ from other_cars import Other_cars
 from YsortCameraGroup import *
 import pickle
 import traceback
+from pygame import time
 
 server = "10.0.0.33"
 port = 5555
@@ -35,6 +36,13 @@ def threaded_client(conn, player):
     reply = ""
     item_num = 0 #for the items naming
     while True:
+        c_items = items.copy()
+        current_time = pygame.time.get_ticks()
+        for item_name , item_dict in c_items.items():
+            if current_time - item_dict['create_time'] >= 100:
+                del items[item_name]
+
+
         try:
             received = conn.recv(2048).decode()
             parts = received.split("~",1)  # Split at the first occurrence of "-"
@@ -60,9 +68,10 @@ def threaded_client(conn, player):
                     item_info = parts[0].split(";",1)         #type   ,   the type
                     if item_info[0] == 'type':
                         if item_info[1] == 'banana': #for banana items
+                            print('got banana')
                             item_info = parts[1].split(";",1)             #pos    ,     the pos
                             if item_info[0] == 'pos':
-                                new_dict = {'type': 'banana','pos': item_info[1],'havesendto':[player]}
+                                new_dict = {'type': 'banana','pos': item_info[1],'havesendto':[player], 'create_time': pygame.time.get_ticks()}
                                 items[f'p{player}i{item_num}'] = new_dict
                         elif item_info[1] == 'turtle':
                             item_info = parts[1].split(";", 1)  # pos    ,     the pos
@@ -70,7 +79,7 @@ def threaded_client(conn, player):
                                 pos = item_info[1]
                             item_info = parts[2].split(";", 1)  # pos    ,     the pos
                             if item_info[0] == 'angle':
-                                new_dict = {'type': 'turtle', 'pos': pos,'angle': item_info[1] , 'havesendto': [player]}
+                                new_dict = {'type': 'turtle', 'pos': pos,'angle': item_info[1] , 'havesendto': [player] , 'create_time': pygame.time.get_ticks()}
                                 items[f'p{player}i{item_num}'] = new_dict
                     item_num +=1 #for the names on the dict
 
@@ -84,27 +93,27 @@ def threaded_client(conn, player):
             break
 
         try: #for the sending
+            ###item sending
+            #new_dict = {'type': 'banana','pos': data.rect,'havesendto':[player]}
+            c_items = items.copy()
+            for name , dict_inside in c_items.items():
+                if player not in dict_inside['havesendto']:
+                    if dict_inside['type'] == 'banana':
+                        to_send = f"kirmul~item_send~name;{name}^type;{dict_inside['type']}^pos;{dict_inside['pos']}*nothing"
+                        conn.sendall(to_send.encode())
+                    elif dict_inside['type'] == 'turtle':
+                        to_send = f"kirmul~item_send~name;{name}^type;{dict_inside['type']}^pos;{dict_inside['pos']}^angle;{dict_inside['angle']}*nothing"
+                        print(f"sending {player}:  {to_send}")
+                        conn.sendall(to_send.encode())
+
             ###cars update sending
             cars_to_send = []
             for name, dict_inside in cars.items():
                 if dict_inside['played'] and player != int(name):
                     cars_to_send.append(dict_inside['object'])
-            #print(f"Sending {player}: ", str(cars_to_send))
-            to_send = f"kirmul~car_send~{pickle.dumps(cars_to_send).decode('latin1')}"
-            conn.sendall(to_send.encode()) #the car send
-
-            ###item sending
-            #new_dict = {'type': 'banana','pos': data.rect,'havesendto':[player]}
-            for name , dict_inside in items.items():
-                if player not in dict_inside['havesendto']:
-                    if dict_inside['type'] == 'banana':
-                        to_send = f"kirmul~item_send~type;{dict_inside['type']}^pos;{dict_inside['pos']}"
-                        conn.sendall(to_send.encode())
-                    elif dict_inside['type'] == 'turtle':
-                        to_send = f"kirmul~item_send~type;{dict_inside['type']}^pos;{dict_inside['pos']}^angle;{dict_inside['angle']}"
-                        print(to_send)
-                        conn.sendall(to_send.encode())
-                    dict_inside['havesendto'].append(player)
+            # print(f"Sending {player}: ", str(cars_to_send))
+            to_send = f"kirmul~car_send~{pickle.dumps(cars_to_send).decode('latin1')}*nothing"
+            conn.sendall(to_send.encode())  # the car send
 
 
         except pickle.UnpicklingError as e:

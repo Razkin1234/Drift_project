@@ -48,14 +48,15 @@ class Network:
             to_send = f"kirmul~item_send~type;{item_data.sprite_type}^pos;{item_data.rect.center}^angle;{item_data.angle}"
             self.client.send(to_send.encode())
         else:
-            to_send = f"kirmul~item_send~type;{item_data.sprite_type}>pos;{item_data.rect}"
+            to_send = f"kirmul~item_send~type;{item_data.sprite_type}>pos;{item_data.rect.center}"
             self.client.send(to_send.encode())
 
 
     def get_info(self,display_surface,level):
         try:
             received = self.client.recv(2048).decode()
-            parts = received.split("~",1)  # Split at the first occurrence of "~"
+            received = received.split("*",1)  # Split at the first occurrence of "~"
+            parts = received[0].split("~",1)  # Split at the first occurrence of "~"
             if parts[0] == 'kirmul':
                 parts = parts[1].split("~",1)
                 if parts[0] == 'car_send':  #for car location update
@@ -76,24 +77,32 @@ class Network:
                                 for new_car in cars:
                                     level.other_cars.append(new_car)
                 elif parts[0] == 'item_send':
-                    print(parts[1])
-                    parts = parts[1].split("^")  # type;{dict_inside['type']}   ,     pos;{dict_inside['pos']}    ,    angle; the angle
-                    item_info = parts[0].split(";", 1)  # type   ,   the type
-                    if item_info[0] == 'type':
-                        if item_info[1] == 'banana':  # for banana items
-                            item_info = parts[1].split(";", 1)  # pos    ,     the pos
-                            # if item_info[0] == 'pos':
-                            #     new_dict = {'type': 'banana', 'pos': item_info[1], 'havesendto': [player]}
-                            #     items[f'p{player}i{item_num}'] = new_dict
-
-                        elif item_info[1] == 'turtle':
-                            pos = (2176, 1344)
-                            item_info = parts[1].split(";", 1)  # pos    ,     the pos
-                            if item_info[0] == 'pos':
-                                pos = item_info[1]
-                            item_info = parts[2].split(";", 1)  # pos    ,     the pos
-                            if item_info[0] == 'angle':
-                                level.car.create_turtle(pos,int(item_info[1]))
+                    print(f"got item: {received[0]}")
+                    parts = parts[1].split("^")  # name;{name}    ,  type;{dict_inside['type']}   ,     pos;{dict_inside['pos']}    ,    angle; the angle
+                    if len(parts) <= 4:
+                        item_info = parts[0].split(";", 1)
+                        if item_info[0] == 'name':
+                            item_name = item_info[1]  #for the dict update
+                            if item_name in level.car.items: #if i already added the item
+                                pass
+                            else:
+                                item_info = parts[1].split(";", 1)  # type   ,   the type
+                                if item_info[0] == 'type':
+                                    if item_info[1] == 'banana':  # for banana items
+                                        item_info = parts[2].split(";", 1)  # pos    ,     the pos
+                                        if item_info[0] == 'pos':
+                                            print(parts)
+                                            print(item_info)
+                                    elif item_info[1] == 'turtle':
+                                        pos = (2176, 1344) #just for warning, means nothing
+                                        item_info = parts[2].split(";", 1)  # pos    ,     the pos
+                                        if item_info[0] == 'pos':
+                                            pos = item_info[1]
+                                        item_info = parts[3].split(";", 1)  # pos    ,     the pos
+                                        if item_info[0] == 'angle':
+                                            new_dict = {'type': 'turtle' , 'pos': pos}
+                                            level.car.items[str(item_name)] = new_dict
+                                            level.car.create_turtle(pos,int(item_info[1])) #adding the item to the dict
                 else:
                     print(received)
             else:

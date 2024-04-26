@@ -78,7 +78,7 @@ class Car(pygame.sprite.Sprite):
         self.lap_num = 0
 
         #items
-        self.item_on = 'turtle'
+        self.item_on = 'banana'
         self.can_bump_items = True
         self.can_bump_items_time = 0
 
@@ -88,6 +88,8 @@ class Car(pygame.sprite.Sprite):
 
         #for the sending:
         self.car_to_send = car_to_send
+
+        self.items = {}
 
 
     def create_turtle(self,rect,angle):
@@ -179,21 +181,24 @@ class Car(pygame.sprite.Sprite):
         self.rect.center = (center_x, center_y)
 
     def collision(self): #for the grass
-        on_grass_now = False
-        for obstacle in self.obstacle_sprites:
-            if pygame.sprite.collide_mask(self, obstacle):
-                if obstacle.sprite_type == 'grass':
-                    on_grass_now = True #for the turn off of on grass function
-                    if self.on_grass is False:
-                        self.max_velocity -= self.grass_velocity
-                        self.forward_acceleration -= self.grass_deceleration
-                        self.backward_acceleration -= self.grass_deceleration
-                        self.on_grass = True
-        if not on_grass_now and self.on_grass: #if not on grass, drive normaly
-            self.max_velocity = self.max_velocity_const
-            self.forward_acceleration = self.froward_acceleration_const
-            self.backward_acceleration = self.backward_acceleration_const
-            self.on_grass = False
+        try:
+            on_grass_now = False
+            for obstacle in self.obstacle_sprites:
+                if pygame.sprite.collide_mask(self, obstacle):
+                    if obstacle.sprite_type == 'grass':
+                        on_grass_now = True #for the turn off of on grass function
+                        if self.on_grass is False:
+                            self.max_velocity -= self.grass_velocity
+                            self.forward_acceleration -= self.grass_deceleration
+                            self.backward_acceleration -= self.grass_deceleration
+                            self.on_grass = True
+            if not on_grass_now and self.on_grass: #if not on grass, drive normaly
+                self.max_velocity = self.max_velocity_const
+                self.forward_acceleration = self.froward_acceleration_const
+                self.backward_acceleration = self.backward_acceleration_const
+                self.on_grass = False
+        except:
+            pass
 
     def checkpoints_collision(self):
         for checkpoint in self.checkpoint_sprites:
