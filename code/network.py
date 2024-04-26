@@ -1,10 +1,12 @@
 import socket
 import pickle
+import traceback
 
 
 class Network:
     def __init__(self):
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        #self.client.settimeout(4)  # Set timeout to 10 seconds (adjust as needed)
         self.server = "10.0.0.33"
         self.port = 5555
         self.addr = (self.server, self.port)
@@ -26,14 +28,11 @@ class Network:
         :param data (the car we want to send):
         :return: all the other cars from the server in a list
         """
-
         try:
-            to_send = f"kirmul|car_send|{pickle.dumps(data).decode('latin1')}"
+            to_send = f"kirmul~car_send~{pickle.dumps(data).decode('latin1')}"
             self.client.send(to_send.encode())
-            return pickle.loads(self.client.recv(2048))
+            received = pickle.loads(self.client.recv(2048))
+            return received
         except socket.error as e:
+            traceback.print_exc()  # Print traceback for debugging
             print(e)
-
-    def work(self):
-        data = b'Hello, server!'
-        self.client.send(data)

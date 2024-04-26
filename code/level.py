@@ -203,7 +203,6 @@ class Level:
 		self.item_sprites.update()
 
 		self.floor_update()
-		self.car.item_on = self.ui.ui_update(self.car.lap_num,self.car.item_on)
 
 		#turtle move!!1
 		for item in self.item_sprites:
@@ -211,9 +210,12 @@ class Level:
 				item.move()
 
 		cars = self.network.send_car(self.car.car_to_send)
-		if len(cars) != 0:
-			for other_car in cars:
-				other_car.blit_other_car(self.car.rect,self.display_surface)
+		if cars != None:
+			if len(cars) != 0:
+				for other_car in cars:
+					other_car.blit_other_car(self.car.rect,self.display_surface)
+
+		self.car.item_on = self.ui.ui_update(self.car.lap_num, self.car.item_on) #drawing the ui
 
 
 

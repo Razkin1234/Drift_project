@@ -32,7 +32,9 @@ def threaded_client(conn, player):
     while True:
         try:
             received = conn.recv(2048).decode()
-            parts = received.split("|")  # Split at the first occurrence of "-"
+            print('got data')
+            print(received)
+            parts = received.split("~",2)  # Split at the first occurrence of "-"
             if len(parts) == 3 and parts[1] == 'car_send':
                 pickled_obj = parts[2].encode('latin1')
                 data = pickle.loads(pickled_obj)
@@ -54,7 +56,7 @@ def threaded_client(conn, player):
                 conn.sendall(pickle.dumps(reply))
         except pickle.UnpicklingError as e:
             print("Error while unpickling:", e)
-            #traceback.print_exc()  # Print traceback for debugging
+            traceback.print_exc()  # Print traceback for debugging
             break
 
 
