@@ -31,8 +31,8 @@ class Network:
         try:
             to_send = f"kirmul~car_send~{pickle.dumps(data).decode('latin1')}"
             self.client.send(to_send.encode())
-            received = pickle.loads(self.client.recv(2048))
-            return received
+            # received = pickle.loads(self.client.recv(2048))
+            # return received
         except socket.error as e:
             traceback.print_exc()  # Print traceback for debugging
             print(e)
@@ -49,5 +49,33 @@ class Network:
         self.client.send(to_send.encode())
 
 
-    def get_info(self):
-        pass
+    def get_info(self,display_surface,level):
+        try:
+            received = self.client.recv(2048).decode()
+            parts = received.split("~",1)  # Split at the first occurrence of "~"
+            if parts[0] == 'kirmul':
+                parts = parts[1].split("~",1)
+                if parts[0] == 'car_send':  #for car location update
+                    pickled_obj = parts[1].encode('latin1')
+                    cars = pickle.loads(pickled_obj)
+                    if cars != None: #for printing the cars
+                        if len(cars) != 0:
+                            if len(level.other_cars) != 0: #the number of cars on the players screen
+                                for i,new_thing in enumerate(cars):
+                                    in_list = False
+                                    for j , thing in enumerate(level.other_cars):
+                                        if thing.name == new_thing.name:
+                                            level.other_cars[j] = new_thing #if the car is existed, update it
+                                            in_list = True #if it is false at the end it will be added
+                                    if not in_list:
+                                        level.other_cars.append(new_thing)
+                            else:
+                                for new_car in cars:
+                                    level.other_cars.append(new_car)
+
+
+
+
+        except pickle.UnpicklingError as e:
+            print("Error while unpickling:", e)
+            traceback.print_exc()  # Print traceback for debugging

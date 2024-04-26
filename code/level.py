@@ -210,15 +210,14 @@ class Level:
 			if item.sprite_type == 'turtle':
 				item.move()
 
-		cars = self.network.send_car(self.car.car_to_send)
-		if cars != None:
-			if len(cars) != 0:
-				for other_car in cars:
+		self.network.send_car(self.car.car_to_send)
+		if self.other_cars != None:
+			if len(self.other_cars) != 0:
+				for other_car in self.other_cars:
 					other_car.blit_other_car(self.car.rect,self.display_surface)
 
 		self.car.item_on = self.ui.ui_update(self.car.lap_num, self.car.item_on) #drawing the ui
 
-		start_new_thread(self.network.get_info , ())
 
 
 

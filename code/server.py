@@ -50,15 +50,16 @@ def threaded_client(conn, player):
                         print("Disconnected")
                         break
                     else:
-                        reply = []
-                        for name , dict_inside in cars.items():
-                            if dict_inside['played'] and player != int(name):
-                                reply.append(dict_inside['object'])
 
-                        print("Received: ", str(data))
-                        print("Sending : ", str(reply))
-
-                    conn.sendall(pickle.dumps(reply))
+                    #     reply = []
+                    #     for name , dict_inside in cars.items():
+                    #         if dict_inside['played'] and player != int(name):
+                    #             reply.append(dict_inside['object'])
+                    #
+                         print("Received: ", str(data))
+                    #     print("Sending : ", str(reply))
+                    #
+                    # conn.sendall(pickle.dumps(reply))
                 elif parts[0] == 'item_send':
                     pickled_obj = parts[1].encode('latin1')
                     data = pickle.loads(pickled_obj)
@@ -75,9 +76,21 @@ def threaded_client(conn, player):
             traceback.print_exc()  # Print traceback for debugging
             break
 
-        # try: #for the items update
-        #     for item_name , dict_item in items.items():
-        #         if player not in dict_item['havesendto']:
+        try: #for the sending
+            ###cars location sending
+            cars_to_send = []
+            for name, dict_inside in cars.items():
+                if dict_inside['played'] and player != int(name):
+                    cars_to_send.append(dict_inside['object'])
+            to_send = f"kirmul~car_send~{pickle.dumps(cars_to_send).decode('latin1')}"
+            print("Sending : ", str(to_send))
+            conn.sendall(to_send.encode())
+
+
+        except pickle.UnpicklingError as e:
+            print("Error while unpickling:", e)
+            traceback.print_exc()  # Print traceback for debugging
+            break
 
 
 
