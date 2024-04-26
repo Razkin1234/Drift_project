@@ -28,7 +28,7 @@ class Network:
         """
 
         try:
-            to_send = f"car_send-{pickle.dumps(data).decode('latin1')}"
+            to_send = f"kirmul|car_send|{pickle.dumps(data).decode('latin1')}"
             self.client.send(to_send.encode())
             return pickle.loads(self.client.recv(2048))
         except socket.error as e:

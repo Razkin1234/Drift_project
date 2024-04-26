@@ -32,9 +32,9 @@ def threaded_client(conn, player):
     while True:
         try:
             received = conn.recv(2048).decode()
-            parts = received.split("-", 1)  # Split at the first occurrence of "-"
-            if len(parts) == 2 and parts[0] == 'car_send':
-                pickled_obj = parts[1].encode('latin1')
+            parts = received.split("|")  # Split at the first occurrence of "-"
+            if len(parts) == 3 and parts[1] == 'car_send':
+                pickled_obj = parts[2].encode('latin1')
                 data = pickle.loads(pickled_obj)
 
                 cars[str(player)]['object'] = data

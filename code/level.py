@@ -212,7 +212,6 @@ class Level:
 
 		cars = self.network.send_car(self.car.car_to_send)
 		if len(cars) != 0:
-			#cars[0].blit_other_car(self.car.rect,self.display_surface)
 			for other_car in cars:
 				other_car.blit_other_car(self.car.rect,self.display_surface)
 
