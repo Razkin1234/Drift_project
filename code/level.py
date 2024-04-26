@@ -9,7 +9,8 @@ from YsortCameraGroup import *
 from ui import UI
 from item import Item
 
-from network import Network
+from _thread import *
+
 
 class Level:
 	def __init__(self,network):
@@ -216,6 +217,8 @@ class Level:
 					other_car.blit_other_car(self.car.rect,self.display_surface)
 
 		self.car.item_on = self.ui.ui_update(self.car.lap_num, self.car.item_on) #drawing the ui
+
+		start_new_thread(self.network.get_info , ())
 
 
 
