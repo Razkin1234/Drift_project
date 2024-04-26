@@ -65,6 +65,10 @@ class Network:
         to_send = f"kirmul~item_delete~name;{item_name}"
         self.client.send(to_send.encode())
 
+    def delete_box_send(self,box_name): #for the item delete
+        to_send = f"kirmul~box_delete~name;{box_name}"
+        self.client.send(to_send.encode())
+
 
     def get_info(self,display_surface,level):
         try:
@@ -120,6 +124,12 @@ class Network:
                                             new_dict = {'type': 'turtle' , 'pos': pos}
                                             level.car.items[str(item_name)] = new_dict
                                             level.car.create_turtle(pos,int(item_info[1]),item_name) #adding the item to the dict
+                                    elif item_info[1] == 'box': #kirmul~item_send~name;{name}^pos;{dict_inside['pos']}*nothing
+                                        item_info = parts[0].split(';',1)
+                                        if item_info[0] == 'name':
+                                            level.car.back_on_box(item_info[1])
+
+
                 elif parts[0] == 'delete_item':    #parts[0] = type  parts[1] = everything else
                     item_info = parts[1].split(';',1)
                     c_items = level.item_sprites.sprites().copy()

@@ -7,7 +7,8 @@ TILESIZE = 64
 
 #for all of the maps
 MAPS = {
-    '1': {'checkpoints_num': '9', 'floor': import_csv_layout('../maps/2/map1_floor.csv') ,'checkpoints' : import_csv_layout('../maps/2/map1_checkpoints.csv') , 'lap_num': '8', 'boxes':{
+    '1': {'checkpoints_num': '9', 'floor': import_csv_layout('../maps/2/map1_floor.csv') ,'checkpoints' : import_csv_layout('../maps/2/map1_checkpoints.csv') , 'lap_num': '8',
+		  'boxes':{
 		    '1': {'location': (1872, 730) , 'is_on': False , 'time_off': 0.0},
 			'2': {'location': (1872, 782), 'is_on': False, 'time_off': 0.0},
 			'3': {'location': (1872, 834), 'is_on': False, 'time_off': 0.0},

@@ -230,10 +230,13 @@ class Car(pygame.sprite.Sprite):
                     if len(self.item_on) == 0: #if i got no items on
                         self.item_on = random.choice(item_list)
                         for box_name , box_dict in self.boxes.items():
-                            if item.rect[:2] == list(box_dict['location']):
+                            if item.name == box_name:
+                                self.network.delete_box_send(box_name)
                                 box_dict['is_on'] = False
                                 box_dict['time_off'] = pygame.time.get_ticks()
-                                item.kill()#remove the sprite
+                                item.kill() #remove the sprite
+
+
                 if (item.sprite_type == 'banana' or item.sprite_type == 'turtle') and self.can_bump_items:
                     name = item.name
                     c_items = self.items.copy()
@@ -251,13 +254,18 @@ class Car(pygame.sprite.Sprite):
                     self.can_move_time = pygame.time.get_ticks()
 
 
+    def back_on_box(self,box_name):
+        Item(self.boxes[box_name]['location'], self.item_sprites, "box", box_name)  # box create
+        self.boxes[box_name]['is_on'] = True
+
     def box_return(self):
         current_time = pygame.time.get_ticks()
         for box_name, box_dict in self.boxes.items():
             if box_dict['is_on'] == False:
                 if current_time - box_dict['time_off'] >= box_retime:
-                    Item(box_dict['location'], self.item_sprites, "box")  # box create
+                    Item(box_dict['location'], self.item_sprites, "box", box_name)  # box create
                     box_dict['is_on'] = True
+
 
     def timer(self):
         current_time = pygame.time.get_ticks()
@@ -277,7 +285,7 @@ class Car(pygame.sprite.Sprite):
         self.checkpoints_collision()
         self.acceleration()  # for the car to gain speed
         self.item_collision() #for the items collision
-        self.box_return() #for the boxes to be back after disappering
+        #self.box_return() #for the boxes to be back after disappering #the server should do it
         self.timer()
 
         self.traction()  # for the traction of the car

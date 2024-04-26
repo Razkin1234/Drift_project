@@ -20,15 +20,25 @@ except socket.error as e:
 s.listen(4)
 print("Waiting for a connection, Server Started")
 
-cars = {'0': {'object': Other_cars('1',(2176, 1344),180,'tank.png'),'round': 0 ,'played': False},
-        '1': {'object': Other_cars('2',(2176, 1344),180,'taxi.png'),'round': 0 , 'played': False},
-        '2': {'object': Other_cars('3',(2176, 1344),180,'batmobile.png'),'round': 0 , 'played': False},
-        '3': {'object': Other_cars('4',(2176, 1344),180,'orange_car.png'),'round': 0 , 'played': False}} #all of the cars
+cars = {'0': {'object': Other_cars('1',(2170, 1344),180,'tank.png'),'round': 0 ,'played': False},
+        '1': {'object': Other_cars('2',(2120, 1344),180,'taxi.png'),'round': 0 , 'played': False},
+        '2': {'object': Other_cars('3',(2070, 1344),180,'batmobile.png'),'round': 0 , 'played': False},
+        '3': {'object': Other_cars('4',(2020, 1344),180,'orange_car.png'),'round': 0 , 'played': False}} #all of the cars
 #'type':   ,'pos':  ,'havesendto': (the players that got the item in an array),'angle'(for turtle type only):
 
 #'example':{'type': 'turtle','pos': (1180,789,40,40),'angle': (1.12,-0.98) ,'havesendto':[1],'create_time': pygame.time.getticks()}
 items = {}
 delete_items = {}
+
+
+boxes = {   '1': {'location': (1872, 730) , 'is_on': True , 'time_off': 0.0},
+			'2': {'location': (1872, 782), 'is_on': True, 'time_off': 0.0},
+			'3': {'location': (1872, 834), 'is_on': True, 'time_off': 0.0},
+			'4': {'location': (1872, 886), 'is_on': True, 'time_off': 0.0},
+			'5': {'location': (1050, 1222), 'is_on': True, 'time_off': 0.0},
+			'6': {'location': (1095, 1222), 'is_on': True, 'time_off': 0.0},
+			'7': {'location': (1518, 1178), 'is_on': True, 'time_off': 0.0},
+			'8': {'location': (1518, 1223), 'is_on': True, 'time_off': 0.0},}
 
 def threaded_client(conn, player):
     print('player: '+ str(player))
@@ -43,8 +53,9 @@ def threaded_client(conn, player):
     reply = ""
     item_num = 0 #for the items naming
     while True:
+
+        current_time = pygame.time.get_ticks()#the current time
         c_items = items.copy()
-        current_time = pygame.time.get_ticks()
         for item_name , item_dict in c_items.items():
             if current_time - item_dict['create_time'] >= 100:
                 del items[item_name]
@@ -52,6 +63,12 @@ def threaded_client(conn, player):
         for item_name , item_dict in c_items.items():
             if current_time - item_dict['create_time'] >= 100:
                 del delete_items[item_name]
+        for box_name, box_dict in boxes.items():
+            if box_dict['is_on'] == False:
+                if current_time - box_dict['time_off'] >= box_retime:
+                    box_dict['is_on'] = True
+                    new_dict = {'type': 'box','pos':box_dict['location'],'havesendto': [],'create_time': pygame.time.get_ticks()}
+                    items[box_name] = new_dict
 
 
         try:
@@ -107,6 +124,14 @@ def threaded_client(conn, player):
                     new_dict = {'create_time': pygame.time.get_ticks(),'havesendto':[player]}
                     delete_items[name] = new_dict
 
+                elif parts[0] == 'box_delete':    #"kirmul~box_delete~name;{box_name}"
+                    item_info = parts[1].split(';')
+                    name = item_info[1]
+                    if name in boxes:#removing the item
+                        boxes[name]['is_on'] = False
+                        boxes[name]['time_off'] = pygame.time.get_ticks()
+                        new_dict = {'create_time': pygame.time.get_ticks(), 'havesendto': [player]}
+                        delete_items[name] = new_dict
 
 
         except pickle.UnpicklingError as e:
@@ -125,6 +150,10 @@ def threaded_client(conn, player):
                         conn.sendall(to_send.encode())
                     elif dict_inside['type'] == 'turtle':
                         to_send = f"kirmul~item_send~name;{name}^type;{dict_inside['type']}^pos;{dict_inside['pos']}^angle;{dict_inside['angle']}*nothing"
+                        print(f"sending {player}:  {to_send}")
+                        conn.sendall(to_send.encode())
+                    elif dict_inside['type'] == 'box':
+                        to_send = f"kirmul~item_send~name;{name}^type;box^pos;{dict_inside['pos']}*nothing"
                         print(f"sending {player}:  {to_send}")
                         conn.sendall(to_send.encode())
 
