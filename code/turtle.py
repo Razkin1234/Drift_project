@@ -8,7 +8,7 @@ class Turlte(pygame.sprite.Sprite):
         path = item_data[item_type]['graphic']
         self.sprite_type = item_type
         self.image = pygame.image.load(path).convert_alpha()
-        self.rect = self.image.get_rect(topleft=pos)
+        self.rect = self.image.get_rect(center=pos)
         self.hitbox = self.rect.inflate(0, 0)  # if i want to overlap itemes
         self.angle = angle
         self.vector = pygame.math.Vector2(self.vector_culc()).normalize() * 10 #the vector times the speed
@@ -18,10 +18,10 @@ class Turlte(pygame.sprite.Sprite):
 
         self.turtle_die = False #to kill the turtle from outside of this class
 
-        self.rect.x += self.vector.x *8
-        self.rect.y += self.vector.y*8
-        self.hitbox.x += self.vector.x*8
-        self.hitbox.y += self.vector.y*8
+        self.rect.x += self.vector.x *5
+        self.rect.y += self.vector.y*5
+        self.hitbox.x += self.vector.x*5
+        self.hitbox.y += self.vector.y*5
 
 
 

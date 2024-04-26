@@ -24,7 +24,10 @@ class Game:
                     pygame.quit()
                     sys.exit()
 
-            start_new_thread(self.network.get_info, (self.screen, self.level))
+            try:
+                start_new_thread(self.network.get_info, (self.screen, self.level))
+            except:
+                pass
             self.screen.fill('black')
             self.level.run()
             pygame.display.update()

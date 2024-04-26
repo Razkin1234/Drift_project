@@ -60,7 +60,7 @@ class Level:
 
 
 	def create_map(self):
-		self.car = Car((self.network.getP().pos[:2]), [self.visible_sprites], self.obstacle_sprites, self.display_surface,self.network.getP().angle,self.boxes ,self.checkpoint_sprites,self.item_sprites,self.network.getP())
+		self.car = Car((self.network.getP().pos[:2]), [self.visible_sprites], self.obstacle_sprites, self.display_surface,self.network.getP().angle,self.boxes ,self.checkpoint_sprites,self.item_sprites,self.network.getP(),self.network)
 
 		self.car_prev_location = self.car.rect[0:2]
 		# Center camera

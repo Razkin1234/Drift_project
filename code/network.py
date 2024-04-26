@@ -31,8 +31,6 @@ class Network:
         try:
             to_send = f"kirmul~car_send~{pickle.dumps(data).decode('latin1')}"
             self.client.send(to_send.encode())
-            # received = pickle.loads(self.client.recv(2048))
-            # return received
         except socket.error as e:
             traceback.print_exc()  # Print traceback for debugging
             print(e)
@@ -45,8 +43,13 @@ class Network:
             traceback.print_exc()  # Print traceback for debugging
             print(e)
     def send_item(self,item_data):
-        to_send = f"kirmul~item_send~{pickle.dumps(item_data).decode('latin1')}"
-        self.client.send(to_send.encode())
+        #to_send = f"kirmul~item_send~type;{dict_inside['type']}>pos;{dict_inside['pos']}"
+        if item_data.sprite_type == 'turtle':
+            to_send = f"kirmul~item_send~type;{item_data.sprite_type}^pos;{item_data.rect.center}^angle;{item_data.angle}"
+            self.client.send(to_send.encode())
+        else:
+            to_send = f"kirmul~item_send~type;{item_data.sprite_type}>pos;{item_data.rect}"
+            self.client.send(to_send.encode())
 
 
     def get_info(self,display_surface,level):
@@ -72,6 +75,30 @@ class Network:
                             else:
                                 for new_car in cars:
                                     level.other_cars.append(new_car)
+                elif parts[0] == 'item_send':
+                    print(parts[1])
+                    parts = parts[1].split("^")  # type;{dict_inside['type']}   ,     pos;{dict_inside['pos']}    ,    angle; the angle
+                    item_info = parts[0].split(";", 1)  # type   ,   the type
+                    if item_info[0] == 'type':
+                        if item_info[1] == 'banana':  # for banana items
+                            item_info = parts[1].split(";", 1)  # pos    ,     the pos
+                            # if item_info[0] == 'pos':
+                            #     new_dict = {'type': 'banana', 'pos': item_info[1], 'havesendto': [player]}
+                            #     items[f'p{player}i{item_num}'] = new_dict
+
+                        elif item_info[1] == 'turtle':
+                            pos = (2176, 1344)
+                            item_info = parts[1].split(";", 1)  # pos    ,     the pos
+                            if item_info[0] == 'pos':
+                                pos = item_info[1]
+                            item_info = parts[2].split(";", 1)  # pos    ,     the pos
+                            if item_info[0] == 'angle':
+                                level.car.create_turtle(pos,int(item_info[1]))
+                else:
+                    print(received)
+            else:
+                print(received)
+
 
 
 

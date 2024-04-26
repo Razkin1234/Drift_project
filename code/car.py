@@ -1,6 +1,6 @@
 import math
 import random
-
+import ast
 import pygame
 from settings import *
 from debug import debug
@@ -11,10 +11,12 @@ from other_cars import Other_cars
 
 
 class Car(pygame.sprite.Sprite):
-    def __init__(self, pos ,groups, obstacle_sprites,display_surface,angle,boxes,checkpoint_sprites,item_sprites,car_to_send ):
+    def __init__(self, pos ,groups, obstacle_sprites,display_surface,angle,boxes,checkpoint_sprites,item_sprites,car_to_send,network):
         super().__init__(groups)
         # drift_acceleration from 0.1 to 2, max_velocity should be less than 1.5
         pygame.sprite.Sprite.__init__(self)
+
+        self.network = network
 
         self.obstacle_sprites = obstacle_sprites
         self.checkpoint_sprites = checkpoint_sprites
@@ -88,6 +90,11 @@ class Car(pygame.sprite.Sprite):
         self.car_to_send = car_to_send
 
 
+    def create_turtle(self,rect,angle):
+        result_tuple = ast.literal_eval(rect)
+        Turlte(result_tuple, self.item_sprites, 'turtle', angle)
+        print('created a turtle')
+        #Turlte(self.rect.center, self.item_sprites, 'turtle', self.angle)
 
     def input(self):
 
@@ -113,11 +120,13 @@ class Car(pygame.sprite.Sprite):
         if pressed[self.button_power]: #power
             if len(self.item_on)!=0:
                 if self.item_on == 'banana':
-                    Item(self.rect.center, self.item_sprites, 'banana')
+                    new_i = Item(self.rect.center, self.item_sprites, 'banana')
+                    self.network.send_item(new_i) #for the server update
                     self.can_bump_items = False #to not bump into my own banana imidiatly
                     self.can_bump_items_time = pygame.time.get_ticks()
                 if self.item_on == 'turtle':
-                    Turlte(self.rect.center,self.item_sprites,'turtle',self.angle)
+                    new_t = Turlte(self.rect.center,self.item_sprites,'turtle',self.angle)
+                    self.network.send_item(new_t)#for the server update
                     self.can_bump_items = False  # to not bump into my own banana imidiatly
                     self.can_bump_items_time = pygame.time.get_ticks()
                 self.item_on = ''

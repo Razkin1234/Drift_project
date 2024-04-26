@@ -23,7 +23,9 @@ cars = {'0': {'object': Other_cars('1',(2176, 1344),180,'tank.png'),'round': 0 ,
         '1': {'object': Other_cars('2',(2176, 1344),180,'taxi.png'),'round': 0 , 'played': False},
         '2': {'object': Other_cars('3',(2176, 1344),180,'batmobile.png'),'round': 0 , 'played': False},
         '3': {'object': Other_cars('4',(2176, 1344),180,'orange_car.png'),'round': 0 , 'played': False}} #all of the cars
-#'type':   ,'pos':  ,'vector'(for turtle type only):  ,'havesendto': (the players that got the item in an array)
+#'type':   ,'pos':  ,'havesendto': (the players that got the item in an array),'angle'(for turtle type only):
+
+#'example':{'type': 'turtle','pos': (1180,789,40,40),'angle': (1.12,-0.98) ,'havesendto':[1]}
 items = {}
 
 def threaded_client(conn, player):
@@ -50,23 +52,28 @@ def threaded_client(conn, player):
                         print("Disconnected")
                         break
                     else:
-
-                    #     reply = []
-                    #     for name , dict_inside in cars.items():
-                    #         if dict_inside['played'] and player != int(name):
-                    #             reply.append(dict_inside['object'])
-                    #
-                         print("Received: ", str(data))
-                    #     print("Sending : ", str(reply))
-                    #
-                    # conn.sendall(pickle.dumps(reply))
+                         #print("Received: ", str(data))
+                        pass
                 elif parts[0] == 'item_send':
-                    pickled_obj = parts[1].encode('latin1')
-                    data = pickle.loads(pickled_obj)
-                    if data.item_type == 'banana':
-                        new_dict = {'type': 'banana','pos': data.rect,'havesendto':[player]}
-                        items[f"player{player}n{item_num}"] = new_dict
-                        item_num += 1
+                    #type;{dict_inside['type']}^pos;{dict_inside['pos']}
+                    parts = parts[1].split("^")             #type;{dict_inside['type']}   ,     pos;{dict_inside['pos']}    ,    angle; the angle
+                    item_info = parts[0].split(";",1)         #type   ,   the type
+                    if item_info[0] == 'type':
+                        if item_info[1] == 'banana': #for banana items
+                            item_info = parts[1].split(";",1)             #pos    ,     the pos
+                            if item_info[0] == 'pos':
+                                new_dict = {'type': 'banana','pos': item_info[1],'havesendto':[player]}
+                                items[f'p{player}i{item_num}'] = new_dict
+                        elif item_info[1] == 'turtle':
+                            item_info = parts[1].split(";", 1)  # pos    ,     the pos
+                            if item_info[0] == 'pos':
+                                pos = item_info[1]
+                            item_info = parts[2].split(";", 1)  # pos    ,     the pos
+                            if item_info[0] == 'angle':
+                                new_dict = {'type': 'turtle', 'pos': pos,'angle': item_info[1] , 'havesendto': [player]}
+                                items[f'p{player}i{item_num}'] = new_dict
+                    item_num +=1 #for the names on the dict
+
                 elif parts[0] == 'disconnect':
                     cars[str(player)]['played'] = False
                     print(f'player {player} has disconnected')
@@ -77,14 +84,27 @@ def threaded_client(conn, player):
             break
 
         try: #for the sending
-            ###cars location sending
+            ###cars update sending
             cars_to_send = []
             for name, dict_inside in cars.items():
                 if dict_inside['played'] and player != int(name):
                     cars_to_send.append(dict_inside['object'])
+            #print(f"Sending {player}: ", str(cars_to_send))
             to_send = f"kirmul~car_send~{pickle.dumps(cars_to_send).decode('latin1')}"
-            print("Sending : ", str(to_send))
-            conn.sendall(to_send.encode())
+            conn.sendall(to_send.encode()) #the car send
+
+            ###item sending
+            #new_dict = {'type': 'banana','pos': data.rect,'havesendto':[player]}
+            for name , dict_inside in items.items():
+                if player not in dict_inside['havesendto']:
+                    if dict_inside['type'] == 'banana':
+                        to_send = f"kirmul~item_send~type;{dict_inside['type']}^pos;{dict_inside['pos']}"
+                        conn.sendall(to_send.encode())
+                    elif dict_inside['type'] == 'turtle':
+                        to_send = f"kirmul~item_send~type;{dict_inside['type']}^pos;{dict_inside['pos']}^angle;{dict_inside['angle']}"
+                        print(to_send)
+                        conn.sendall(to_send.encode())
+                    dict_inside['havesendto'].append(player)
 
 
         except pickle.UnpicklingError as e:
@@ -92,12 +112,11 @@ def threaded_client(conn, player):
             traceback.print_exc()  # Print traceback for debugging
             break
 
-
-
-
-
     print(f"Lost connection with {player}")
     conn.close()
+
+
+
 
 currentPlayer = 0
 while True:
