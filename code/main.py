@@ -3,21 +3,24 @@ import sys
 from debug import debug
 from  settings import *
 from level import *
+from network import Network
 
 class Game:
     def __init__(self):
         #general setup
         pygame.init()
+        self.network = Network() #the network
         self.screen = pygame.display.set_mode((WIDTH,HEIGTH))
         pygame.display.set_caption('Just Drift')
         self.clock = pygame.time.Clock()
 
-        self.level = Level()
+        self.level = Level(self.network)
 
     def run(self):
         while True:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
+                    self.network.send_disconnect()
                     pygame.quit()
                     sys.exit()
 

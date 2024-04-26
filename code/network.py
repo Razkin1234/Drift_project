@@ -36,3 +36,12 @@ class Network:
         except socket.error as e:
             traceback.print_exc()  # Print traceback for debugging
             print(e)
+
+    def send_disconnect(self):
+        try:
+            to_send = f"kirmul~disconnect~cushvuthksntusani"
+            self.client.send(to_send.encode())
+            pickle.loads(self.client.recv(2048))
+        except socket.error as e:
+            traceback.print_exc()  # Print traceback for debugging
+            print(e)

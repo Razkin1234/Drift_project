@@ -35,25 +35,30 @@ def threaded_client(conn, player):
             print('got data')
             print(received)
             parts = received.split("~",2)  # Split at the first occurrence of "-"
-            if len(parts) == 3 and parts[1] == 'car_send':
-                pickled_obj = parts[2].encode('latin1')
-                data = pickle.loads(pickled_obj)
+            if len(parts) == 3:
+                if parts[1] == 'car_send':
+                    pickled_obj = parts[2].encode('latin1')
+                    data = pickle.loads(pickled_obj)
 
-                cars[str(player)]['object'] = data
+                    cars[str(player)]['object'] = data
 
-                if not data:
-                    print("Disconnected")
+                    if not data:
+                        print("Disconnected")
+                        break
+                    else:
+                        reply = []
+                        for name , dict_inside in cars.items():
+                            if dict_inside['played'] and player != int(name):
+                                reply.append(dict_inside['object'])
+
+                        print("Received: ", str(data))
+                        print("Sending : ", str(reply))
+
+                    conn.sendall(pickle.dumps(reply))
+                elif parts[1] == 'disconnect':
+                    cars[str(player)]['played'] = False
+                    print(f'player {player} has disconnected')
                     break
-                else:
-                    reply = []
-                    for name , dict_inside in cars.items():
-                        if dict_inside['played'] and player != int(name):
-                            reply.append(dict_inside['object'])
-
-                    print("Received: ", str(data))
-                    print("Sending : ", str(reply))
-
-                conn.sendall(pickle.dumps(reply))
         except pickle.UnpicklingError as e:
             print("Error while unpickling:", e)
             traceback.print_exc()  # Print traceback for debugging

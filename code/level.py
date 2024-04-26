@@ -12,7 +12,7 @@ from item import Item
 from network import Network
 
 class Level:
-	def __init__(self):
+	def __init__(self,network):
 
 		# get the display surface / the screen
 		self.display_surface = pygame.display.get_surface()
@@ -40,7 +40,7 @@ class Level:
 		self.boxes = MAPS['1']['boxes']
 
 		#for the online:
-		self.network = Network()
+		self.network = network
 
 		#the map building
 		self.create_map()
