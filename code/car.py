@@ -53,6 +53,7 @@ class Car(pygame.sprite.Sprite):
 
         self.car_skin = car_skin
 
+
         self.original_image = pygame.image.load(f'../graphics/cars/{self.car_skin}').convert_alpha() #the car image
         self.image = self.original_image
         self.rect = self.image.get_rect(topleft=pos)
@@ -88,6 +89,8 @@ class Car(pygame.sprite.Sprite):
 
         #for the sending:
         self.car_to_send = car_to_send
+
+        self.car_to_send.update_car_skin(self.car_skin)
 
         self.items = {}
         self.item_num = 0 #for tracking the item

@@ -47,7 +47,7 @@ class Game:
             self.screen.blit(MENU_TEXT, MENU_RECT)
 
             for button in [PLAY_BUTTON, OPTIONS_BUTTON, QUIT_BUTTON]:
-                button.changeColor(MENU_MOUSE_POS)
+                button.changeColor(MENU_MOUSE_POS,self.screen)
                 button.update(self.screen)
 
             for event in pygame.event.get():
@@ -88,18 +88,38 @@ class Game:
                                      text_input="", font=self.get_font(75), base_color="#d7fcd4",
                                      hovering_color="White", surface= self.transparent_surface)
                 b_list.append(i)
-            for i in range(10):
-                i = my_button(image=pygame.image.load(f"../graphics/cars/{self.skins_list[i+10]}"), pos=(300 + 75*i, 400),
+            for i in range(10,20):
+                i = my_button(image=pygame.image.load(f"../graphics/cars/{self.skins_list[i]}"), pos=(300 + 75*(i-10), 400),
                                      text_input="", font=self.get_font(75), base_color="#d7fcd4",
                                      hovering_color="White", surface= self.transparent_surface)
                 b_list.append(i)
 
 
-            b_list.append(BACK_BUTTON)
             self.screen.blit(MENU_TEXT, MENU_RECT)
 
-            for button in b_list:
-                button.changeColor(MENU_MOUSE_POS)
+            skin_text = self.get_font(50).render("Your Skin:", True, "#b68f40")
+            skin_text_rect = MENU_TEXT.get_rect(center=(500, 675))
+            self.screen.blit(skin_text,skin_text_rect)
+            #for your car skin
+            self.transparent_surface.fill((0, 0, 0, 0))
+
+            image = pygame.image.load(f"../graphics/cars/{self.car_skin}")
+            new_rect = image.get_rect(center= (490,645))
+            big_rect = pygame.Rect(new_rect.x, new_rect.y, new_rect[2] + 20, new_rect[3] + 20)
+            big_rect.center = new_rect.center
+
+            pygame.draw.rect(self.transparent_surface, (200, 150, 100, 200), big_rect)
+            pygame.draw.rect(self.transparent_surface, (100, 100, 100, 200), big_rect, 3)
+
+            self.screen.blit(self.transparent_surface, (0, 0))
+            self.screen.blit(image, new_rect)
+
+
+
+            a_list = b_list.copy()
+            a_list.append(BACK_BUTTON)
+            for button in a_list:
+                button.changeColor(MENU_MOUSE_POS,self.screen)
                 button.update(self.screen)
 
             for event in pygame.event.get():
@@ -109,6 +129,11 @@ class Game:
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if BACK_BUTTON.checkForInput(MENU_MOUSE_POS):
                         not_to_the_manu = False
+                    else:
+                        for index , button in enumerate(b_list):
+                            if button.checkForInput(MENU_MOUSE_POS):
+                                self.car_skin = self.skins_list[index]
+
 
 
             pygame.display.update()
