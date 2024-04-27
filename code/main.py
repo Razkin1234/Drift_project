@@ -15,6 +15,7 @@ class Game:
         self.transparent_surface = pygame.Surface((WIDTH,HEIGTH),pygame.SRCALPHA )
         pygame.display.set_caption('Just Drift')
         self.clock = pygame.time.Clock()
+        self.ip = ''
 
         self.level = None
         self.car_skin = 'formula_pink.png'
@@ -36,12 +37,12 @@ class Game:
             MENU_TEXT = self.get_font(100).render("MAIN MENU", True, "#b68f40")
             MENU_RECT = MENU_TEXT.get_rect(center=(640, 50))
 
-            PLAY_BUTTON = Button(image=pygame.image.load("../graphics/manu/Play Rect.png"), pos=(200, 180),
+            PLAY_BUTTON = Button(image=pygame.image.load("../graphics/manu/Quit Rect.png"), pos=(200, 180),
                                  text_input="PLAY", font=self.get_font(75), base_color="#d7fcd4", hovering_color="White")
-            OPTIONS_BUTTON = Button(image=pygame.image.load("../graphics/manu/Options Rect.png"), pos=(306, 300),
-                                    text_input="OPTIONS", font=self.get_font(75), base_color="#d7fcd4",
+            OPTIONS_BUTTON = Button(image=pygame.image.load("../graphics/manu/Quit Rect.png"), pos=(200, 300),
+                                    text_input="SKINS", font=self.get_font(75), base_color="#d7fcd4",
                                     hovering_color="White")
-            QUIT_BUTTON = Button(image=pygame.image.load("../graphics/manu/Quit Rect.png"), pos=(190, 420),
+            QUIT_BUTTON = Button(image=pygame.image.load("../graphics/manu/Quit Rect.png"), pos=(200, 420),
                                  text_input="QUIT", font=self.get_font(75), base_color="#d7fcd4", hovering_color="White")
 
             self.screen.blit(MENU_TEXT, MENU_RECT)
@@ -141,11 +142,77 @@ class Game:
 
         self.main_menu()
 
+    def ip_screen(self):
+        ip_text = "10.0.0.33"
+
+        not_to_play = True
+        backround = pygame.image.load("../graphics/manu/skinbackround.png")
+        while not_to_play:
+            self.screen.blit(backround, (0, 0))
+
+            MENU_MOUSE_POS = pygame.mouse.get_pos()
+
+            MENU_TEXT = self.get_font(100).render("INSERT IP", True, "#b68f40")
+            MENU_RECT = MENU_TEXT.get_rect(center=(640, 50))
+            self.screen.blit(MENU_TEXT, MENU_RECT)
+
+            BACK_BUTTON = Button(image=pygame.image.load("../graphics/manu/Quit Rect.png"), pos=(1075, 650),
+                                 text_input="BACK", font=self.get_font(75), base_color="#d7fcd4",
+                                 hovering_color="White")
+
+            PLAY_BUTTON = Button(image=pygame.image.load("../graphics/manu/go_play.png"), pos=(880, 376),
+                                 text_input="PLAY", font=self.get_font(40), base_color="#d7fcd4",
+                                 hovering_color="White")
+
+
+            user_text = self.get_font(24).render(ip_text, True, "gold")
+            user_text_rect = MENU_TEXT.get_rect(topleft=(540, 360))
+            box_rect = pygame.rect.Rect(536,356,275,40)
+            pygame.draw.rect(self.screen,(100, 100, 100),box_rect)
+            pygame.draw.rect(self.screen, (70, 70, 70), box_rect,3)
+            self.screen.blit(user_text, user_text_rect)
+
+            user_text = self.get_font(40).render('The IP:', True, "#b68f40")
+            user_text_rect = MENU_TEXT.get_rect(topleft=(300, 350))
+            self.screen.blit(user_text, user_text_rect)
+
+
+            a_list = []
+            a_list.append(BACK_BUTTON)
+            a_list.append(PLAY_BUTTON)
+            for button in a_list:
+                button.changeColor(MENU_MOUSE_POS,self.screen)
+                button.update(self.screen)
+
+            pygame.display.flip()  # Update the display
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if BACK_BUTTON.checkForInput(MENU_MOUSE_POS):
+                        self.main_menu()
+                    if PLAY_BUTTON.checkForInput(MENU_MOUSE_POS):
+                        self.ip = ip_text
+                        not_to_play = False
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_BACKSPACE:
+                        ip_text = ip_text[:-1]
+                    elif event.key == pygame.K_RETURN:
+                        self.ip = ip_text
+                        not_to_play = False
+                    else:
+                        ip_text += event.unicode
+
+
+
 
     def run(self):
         self.main_menu() #for the main menu
 
-        self.network = Network()
+        self.ip_screen()
+        self.network = Network(self.ip)
         self.level = Level(self.network,self.car_skin)
         while True:
             for event in pygame.event.get():

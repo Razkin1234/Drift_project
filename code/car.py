@@ -84,7 +84,8 @@ class Car(pygame.sprite.Sprite):
         self.can_bump_items_time = 0
 
 
-        self.can_move = True #if i can move
+        self.can_move = False #if i can move
+        self.start = True #for the beggining of a game
         self.can_move_time = 0
 
         #for the sending:
@@ -95,6 +96,30 @@ class Car(pygame.sprite.Sprite):
         self.items = {}
         self.item_num = 0 #for tracking the item
         self.player = self.network.player #the number of the player in the server
+
+        self.traffic_light_on = True
+        self.traffic_light_on_time = 0
+        self.empty_light = True
+        self.red_light = False
+        self.yellow_light = False
+        self.green_light = False
+        self.the_light_to_display = pygame.image.load('../graphics/light/empty_light.png')
+
+        self.do_sound = True #for the sound
+        self.start_sound = pygame.mixer.Sound('../graphics/sound/start_sound.wav')
+        self.sound_track = pygame.mixer.Sound('../graphics/sound/sound_track.wav')
+
+
+        #for the cooldowns
+        self.can_use_item = True
+        self.can_use_item_time = 0
+
+
+    def start_game(self):
+        self.traffic_light_on = True
+        self.start = True
+        self.traffic_light_on_time = pygame.time.get_ticks()
+
 
     def create_turtle(self,rect,angle,item_name):
         Turlte(rect, self.item_sprites, 'turtle', angle,item_name)
@@ -276,9 +301,49 @@ class Car(pygame.sprite.Sprite):
             if current_time - self.can_bump_items_time >= 500:
                 self.can_bump_items = True
 
-        if not self.can_move:
+        if not self.can_move and not self.start:
             if current_time - self.can_move_time >= 1000: #how many time i cant move after a hit
                 self.can_move = True
+
+
+    def traffic_lights(self):
+        current_time = pygame.time.get_ticks()
+        if self.empty_light:
+            if self.do_sound:
+                if current_time - self.traffic_light_on_time >= 4000:
+                    self.start_sound.play()
+                    self.do_sound = False
+            else:
+                if current_time - self.traffic_light_on_time >= 5000:
+                    self.red_light = True
+                    self.empty_light = False
+                    self.traffic_light_on_time = pygame.time.get_ticks()
+                    self.the_light_to_display = pygame.image.load('../graphics/light/red_light.png')
+
+        else:
+            if current_time - self.traffic_light_on_time >= 1000:
+                if self.red_light:
+                    self.the_light_to_display = pygame.image.load('../graphics/light/yellow_light.png')
+                    self.yellow_light = True
+                    self.red_light = False
+                    self.traffic_light_on_time = pygame.time.get_ticks()
+                elif self.yellow_light:
+                    self.the_light_to_display = pygame.image.load('../graphics/light/green_light.png')
+                    self.can_move = True
+                    self.yellow_light = False
+                    self.green_light = True
+                    self.traffic_light_on_time = pygame.time.get_ticks()
+                elif self.green_light:
+                    self.green_light = False
+                    self.traffic_light_on = False
+                    self.start = False
+                    self.sound_track.play(loops=-1)
+
+
+
+
+        for i in range(30):
+            self.display_surface.blit(self.the_light_to_display, (0 + i * 43, 0))
 
 
     def update(self):
@@ -294,6 +359,11 @@ class Car(pygame.sprite.Sprite):
         self.traction()  # for the traction of the car
 
         self.car_to_send.update_own_data(self.rect,self.angle)
+
+        if self.traffic_light_on:
+            self.traffic_lights()
+
+
 
         
 
