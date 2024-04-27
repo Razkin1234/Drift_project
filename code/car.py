@@ -97,7 +97,7 @@ class Car(pygame.sprite.Sprite):
         self.item_num = 0 #for tracking the item
         self.player = self.network.player #the number of the player in the server
 
-        self.traffic_light_on = True
+        self.traffic_light_on = False #for starting the game
         self.traffic_light_on_time = 0
         self.empty_light = True
         self.red_light = False
@@ -110,9 +110,17 @@ class Car(pygame.sprite.Sprite):
         self.sound_track = pygame.mixer.Sound('../graphics/sound/sound_track.wav')
 
 
+        self.didnt_start = True
+
+
         #for the cooldowns
         self.can_use_item = True
         self.can_use_item_time = 0
+
+        self.can_mute = True
+        self.can_mute_time = 0
+
+        self.can_press_s = True
 
 
     def start_game(self):
@@ -150,7 +158,7 @@ class Car(pygame.sprite.Sprite):
         if pressed[self.button_right]:  # right turn
             self.turn_right(self.moving_vector.x, self.moving_vector.y)
 
-        if pressed[self.button_power]: #power
+        if pressed[self.button_power] and self.can_use_item: #power
             if len(self.item_on)!=0:
                 if self.item_on == 'banana':
                     name = f'p{self.player}i{self.item_num}'
@@ -167,6 +175,20 @@ class Car(pygame.sprite.Sprite):
                     self.can_bump_items = False  # to not bump into my own banana imidiatly
                     self.can_bump_items_time = pygame.time.get_ticks()
                 self.item_on = ''
+                self.can_use_item = False
+                self.can_use_item_time = pygame.time.get_ticks()
+        if pressed[pygame.K_m] and self.can_mute:
+            self.can_mute = False
+            self.can_mute_time = pygame.time.get_ticks()
+            if self.sound_track.get_volume() == 0:
+                self.sound_track.set_volume(1)
+            else:
+                self.sound_track.set_volume(0)
+        if self.can_press_s and pressed[pygame.K_s]:
+            self.didnt_start = False
+            self.traffic_light_on = True
+            self.traffic_light_on_time = pygame.time.get_ticks()
+            self.can_press_s = False
 
 
     def acceleration(self):
@@ -260,8 +282,6 @@ class Car(pygame.sprite.Sprite):
                         for box_name , box_dict in self.boxes.items():
                             if item.name == box_name:
                                 self.network.delete_box_send(box_name)
-                                box_dict['is_on'] = False
-                                box_dict['time_off'] = pygame.time.get_ticks()
                                 item.kill() #remove the sprite
 
 
@@ -286,14 +306,6 @@ class Car(pygame.sprite.Sprite):
         Item(self.boxes[box_name]['location'], self.item_sprites, "box", box_name)  # box create
         self.boxes[box_name]['is_on'] = True
 
-    def box_return(self):
-        current_time = pygame.time.get_ticks()
-        for box_name, box_dict in self.boxes.items():
-            if box_dict['is_on'] == False:
-                if current_time - box_dict['time_off'] >= box_retime:
-                    Item(box_dict['location'], self.item_sprites, "box", box_name)  # box create
-                    box_dict['is_on'] = True
-
 
     def timer(self):
         current_time = pygame.time.get_ticks()
@@ -304,6 +316,13 @@ class Car(pygame.sprite.Sprite):
         if not self.can_move and not self.start:
             if current_time - self.can_move_time >= 1000: #how many time i cant move after a hit
                 self.can_move = True
+        if not self.can_use_item:
+            if current_time - self.can_use_item_time >= 500:
+                self.can_use_item = True
+
+        if not self.can_mute:
+            if current_time - self.can_mute_time >= 500:
+                self.can_mute = True
 
 
     def traffic_lights(self):
@@ -363,6 +382,23 @@ class Car(pygame.sprite.Sprite):
         if self.traffic_light_on:
             self.traffic_lights()
 
+        if self.didnt_start:
+            transparent_surface = pygame.Surface((WIDTH, HEIGTH), pygame.SRCALPHA)
+            transparent_surface.fill((0, 0, 0, 0))
+            big_rect = pygame.rect.Rect(70,10,1150,200)
+            pygame.draw.rect(transparent_surface, (150, 150, 150, 230), big_rect)
+            pygame.draw.rect(transparent_surface, (100, 100, 100, 230), big_rect, 3)
+            self.display_surface.blit(transparent_surface, (0, 0))
+
+
+
+            MENU_TEXT = pygame.font.Font("../graphics/font/joystix.ttf", 80).render("TO START THE GAME", True, "#b68f40")
+            MENU_RECT = MENU_TEXT.get_rect(center=(640, 50))
+            self.display_surface.blit(MENU_TEXT, MENU_RECT)
+
+            MENU_TEXT = pygame.font.Font("../graphics/font/joystix.ttf", 80).render("PRESS S", True,"#b68f40")
+            MENU_RECT = MENU_TEXT.get_rect(center=(640, 150))
+            self.display_surface.blit(MENU_TEXT, MENU_RECT)
 
 
         

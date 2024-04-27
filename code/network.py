@@ -69,6 +69,8 @@ class Network:
         to_send = f"kirmul~box_delete~name;{box_name}"
         self.client.send(to_send.encode())
 
+    def start_send(self):
+        pass
 
     def get_info(self,display_surface,level):
         try:
