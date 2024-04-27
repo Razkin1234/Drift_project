@@ -70,7 +70,8 @@ class Network:
         self.client.send(to_send.encode())
 
     def start_send(self):
-        pass
+        to_send = f"kirmul~game_start~bullshit;gimel"
+        self.client.send(to_send.encode())
 
     def get_info(self,display_surface,level):
         try:
