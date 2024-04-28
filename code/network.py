@@ -75,6 +75,10 @@ class Network:
         to_send = f"kirmul~game_start~bullshit;gimel"
         self.client.send(to_send.encode())
 
+    def lap_send(self,lap,time):
+        to_send = f"kirmul~lap_update~lap;{lap}^time:{time}"
+        self.client.send(to_send.encode())
+
     def get_info(self,display_surface,level):
         try:
             received = self.client.recv(2048).decode()
@@ -141,12 +145,18 @@ class Network:
                     for item in c_items:
                         if item.name == item_info[1]:
                             item.kill()#killing the sprite
-                elif parts[0] == 'game_start':
-                    print('got_start')
+                elif parts[0] == 'game_start': #game_start~players_num;{number_of_players}
+                    item_info = parts[1].split(';',1)
+                    if item_info[0] == 'players_num':
+                        level.car.number_of_players = int(item_info[1])
                     level.car.didnt_start = False
                     level.car.traffic_light_on = True
                     level.car.traffic_light_on_time = pygame.time.get_ticks()
                     level.car.can_press_s = False
+                elif parts[0] == 'lap_update':  #for lap update
+                    pickled_obj = parts[1].encode('latin1')
+                    the_list = pickle.loads(pickled_obj)
+                    level.car.lap_time_list = the_list
 
                 else:
                     print(received)

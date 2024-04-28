@@ -20,16 +20,19 @@ except socket.error as e:
 s.listen(4)
 print("Waiting for a connection, Server Started")
 
-cars = {'0': {'object': Other_cars('1',(2170, 1344),180,'tank.png'),'round': 0 ,'played': False},
-        '1': {'object': Other_cars('2',(2120, 1344),180,'taxi.png'),'round': 0 , 'played': False},
-        '2': {'object': Other_cars('3',(2070, 1344),180,'batmobile.png'),'round': 0 , 'played': False},
-        '3': {'object': Other_cars('4',(2020, 1344),180,'orange_car.png'),'round': 0 , 'played': False}} #all of the cars
+cars = {'0': {'object': Other_cars('1',(2170, 1344),180,'tank.png'),'round': 0 ,'played': False , 'lap': 0 , 'time': 0, 'name': 'efi', 'gap': 0},
+        '1': {'object': Other_cars('2',(2120, 1344),180,'taxi.png'),'round': 0 , 'played': False, 'lap': 0 , 'time': 0, 'name': 'play1', 'gap': 0},
+        '2': {'object': Other_cars('3',(2070, 1344),180,'batmobile.png'),'round': 0 , 'played': False, 'lap': 0 , 'time': 0, 'name': 'play2', 'gap': 0},
+        '3': {'object': Other_cars('4',(2020, 1344),180,'orange_car.png'),'round': 0 , 'played': False, 'lap': 0 , 'time': 0, 'name': 'yesh3', 'gap': 0}} #all of the cars
+
+
 #'type':   ,'pos':  ,'havesendto': (the players that got the item in an array),'angle'(for turtle type only):
 
 #'example':{'type': 'turtle','pos': (1180,789,40,40),'angle': (1.12,-0.98) ,'havesendto':[1],'create_time': pygame.time.getticks()}
 items = {}
 delete_items = {}
 start_send = {}
+lap_send = {}
 
 
 
@@ -60,6 +63,10 @@ def threaded_client(conn, player):
         if len(start_send) > 0:
             if current_time - start_send['time'] >= 100 and start_send['send']:
                 start_send['send'] = False
+
+        if len(lap_send) > 0:
+            if current_time - lap_send['time'] >= 100 and lap_send['send']:
+                lap_send['send'] = False
 
         for item_name , item_dict in c_items.items():
             if current_time - item_dict['create_time'] >= 100:
@@ -96,7 +103,7 @@ def threaded_client(conn, player):
                          #print("Received: ", str(data))
                         pass
                 elif parts[0] == 'item_send':
-                    print(parts[1])
+                    #print(parts[1])
                     #type;{dict_inside['type']}^pos;{dict_inside['pos']}
                     parts = parts[1].split("^")             #type;{dict_inside['type']}   ,     pos;{dict_inside['pos']}    ,    angle; the angle
                     item_info = parts[0].split(";",1)         #type   ,   the type
@@ -141,6 +148,16 @@ def threaded_client(conn, player):
                     start_send['send'] = True
                     start_send['time'] = pygame.time.get_ticks()
 
+                elif parts[0] == 'lap_update': #lap_update~lap;{lap}^time:{time}
+                    parts = parts[1].split('^')
+                    item_info = parts[0].split(';')
+                    if item_info[0] == 'lap':
+                        cars[str(player)]['lap'] = int(item_info[1])
+                        item_info = parts[1].split(';')
+                        if item_info[0] == 'time':
+                            cars[str(player)]['time'] = int(item_info[1])
+                            lap_send['send'] = True
+                            lap_send['time'] = pygame.time.get_ticks()
 
         except pickle.UnpicklingError as e:
             print("Error while unpickling:", e)
@@ -151,9 +168,29 @@ def threaded_client(conn, player):
             #start sending
             if len(start_send) > 0:
                 if start_send['send']:
-                    print('send_start')
-                    to_send = f"kirmul~game_start*nothing"
+                    number_of_players = 0
+                    for name , dict_info in cars.items():
+                        if dict_info['played']:
+                            number_of_players += 1
+
+                    print(f'send_start: {number_of_players}')
+                    to_send = f"kirmul~game_start~players_num;{number_of_players}*nothing"
                     conn.sendall(to_send.encode())
+
+            #lap update sending   [{'name':'player_1','time': 20549, 'gap':0},{'name':'player_2','time': 21579, 'gap':0},{'name':'player_3','time': 24549, 'gap':0}]
+            # if len(lap_send) > 0:
+            #     if lap_send['send']:
+            #         list = []
+            #         for name , dict_info in cars.items():
+            #             if dict_info['played']:
+            #                 new_dict = {'name': dict_info['name'],'time': dict_info['time'], 'gap':dict_info['gap']}
+            #                 list.append(new_dict)
+            #         print(f'lap_send: {list}')
+            #         to_send = f"kirmul~lap_update~{pickle.dumps(list).decode('latin1')}*nothing"
+            #         conn.sendall(to_send.encode())
+
+
+
             ###item sending
             #new_dict = {'type': 'banana','pos': data.rect,'havesendto':[player]}
             c_items = items.copy()
@@ -180,8 +217,8 @@ def threaded_client(conn, player):
 
             ###cars update sending
             cars_to_send = []
-            for name, dict_inside in cars.items():
-                if dict_inside['played'] and player != int(name):
+            for key, dict_inside in cars.items():
+                if dict_inside['played'] and player != int(key):
                     cars_to_send.append(dict_inside['object'])
             # print(f"Sending {player}: ", str(cars_to_send))
             to_send = f"kirmul~car_send~{pickle.dumps(cars_to_send).decode('latin1')}*nothing"
@@ -201,8 +238,12 @@ def threaded_client(conn, player):
 
 currentPlayer = 0
 while True:
+    print(f'start_send: {start_send}')
     conn, addr = s.accept()
-    print("Connected to:", addr)
+    if len(start_send) == 0:
+        print("Connected to:", addr)
 
-    start_new_thread(threaded_client, (conn, currentPlayer))
-    currentPlayer += 1
+        start_new_thread(threaded_client, (conn, currentPlayer))
+        currentPlayer += 1
+    else:
+        conn.close()

@@ -112,6 +112,10 @@ class Car(pygame.sprite.Sprite):
 
         self.didnt_start = True
 
+        self.start_time = 0 #for the clock
+        self.number_of_players = 3 #the players amount
+        self.lap_time_list = []
+
 
         #for the cooldowns
         self.can_use_item = True
@@ -268,6 +272,7 @@ class Car(pygame.sprite.Sprite):
                     if checkpoint.sprite_type == '51': #finished lap!!!
                         self.were_in_checkpoints.clear()
                         self.lap_num += 1
+                        self.network.lap_send(self.lap_num,self.start_time)
                 else:
                     if int(checkpoint.sprite_type) - 1 == self.were_in_checkpoints[-1]:
                         self.were_in_checkpoints.append(int(checkpoint.sprite_type))
@@ -353,6 +358,8 @@ class Car(pygame.sprite.Sprite):
                     self.yellow_light = False
                     self.green_light = True
                     self.traffic_light_on_time = pygame.time.get_ticks()
+
+                    self.start_time = pygame.time.get_ticks() #for the clock
                 elif self.green_light:
                     self.green_light = False
                     self.traffic_light_on = False
@@ -364,6 +371,23 @@ class Car(pygame.sprite.Sprite):
 
         for i in range(30):
             self.display_surface.blit(self.the_light_to_display, (0 + i * 43, 0))
+
+    def didnt_start_screen_draw(self):
+        transparent_surface = pygame.Surface((WIDTH, HEIGTH), pygame.SRCALPHA)
+        transparent_surface.fill((0, 0, 0, 0))
+        big_rect = pygame.rect.Rect(70, 10, 1150, 200)
+        pygame.draw.rect(transparent_surface, (150, 150, 150, 230), big_rect)
+        pygame.draw.rect(transparent_surface, (100, 100, 100, 230), big_rect, 3)
+        self.display_surface.blit(transparent_surface, (0, 0))
+
+        MENU_TEXT = pygame.font.Font("../graphics/font/joystix.ttf", 80).render("TO START THE GAME", True, "#b68f40")
+        MENU_RECT = MENU_TEXT.get_rect(center=(640, 50))
+        self.display_surface.blit(MENU_TEXT, MENU_RECT)
+
+        MENU_TEXT = pygame.font.Font("../graphics/font/joystix.ttf", 80).render("PRESS S", True, "#b68f40")
+        MENU_RECT = MENU_TEXT.get_rect(center=(640, 150))
+        self.display_surface.blit(MENU_TEXT, MENU_RECT)
+
 
 
     def update(self):
@@ -384,22 +408,8 @@ class Car(pygame.sprite.Sprite):
             self.traffic_lights()
 
         if self.didnt_start:
-            transparent_surface = pygame.Surface((WIDTH, HEIGTH), pygame.SRCALPHA)
-            transparent_surface.fill((0, 0, 0, 0))
-            big_rect = pygame.rect.Rect(70,10,1150,200)
-            pygame.draw.rect(transparent_surface, (150, 150, 150, 230), big_rect)
-            pygame.draw.rect(transparent_surface, (100, 100, 100, 230), big_rect, 3)
-            self.display_surface.blit(transparent_surface, (0, 0))
-
-
-
-            MENU_TEXT = pygame.font.Font("../graphics/font/joystix.ttf", 80).render("TO START THE GAME", True, "#b68f40")
-            MENU_RECT = MENU_TEXT.get_rect(center=(640, 50))
-            self.display_surface.blit(MENU_TEXT, MENU_RECT)
-
-            MENU_TEXT = pygame.font.Font("../graphics/font/joystix.ttf", 80).render("PRESS S", True,"#b68f40")
-            MENU_RECT = MENU_TEXT.get_rect(center=(640, 150))
-            self.display_surface.blit(MENU_TEXT, MENU_RECT)
+            pass
+            #self.didnt_start_screen_draw()
 
 
         
