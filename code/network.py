@@ -2,6 +2,8 @@ import socket
 import pickle
 import traceback
 import ast
+import pygame.time
+
 
 
 class Network:
@@ -139,6 +141,12 @@ class Network:
                     for item in c_items:
                         if item.name == item_info[1]:
                             item.kill()#killing the sprite
+                elif parts[0] == 'game_start':
+                    print('got_start')
+                    level.car.didnt_start = False
+                    level.car.traffic_light_on = True
+                    level.car.traffic_light_on_time = pygame.time.get_ticks()
+                    level.car.can_press_s = False
 
                 else:
                     print(received)

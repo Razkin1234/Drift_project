@@ -29,6 +29,8 @@ cars = {'0': {'object': Other_cars('1',(2170, 1344),180,'tank.png'),'round': 0 ,
 #'example':{'type': 'turtle','pos': (1180,789,40,40),'angle': (1.12,-0.98) ,'havesendto':[1],'create_time': pygame.time.getticks()}
 items = {}
 delete_items = {}
+start_send = {}
+
 
 
 boxes = {   '1': {'location': (1872, 730) , 'is_on': True , 'time_off': 0.0},
@@ -48,7 +50,6 @@ def threaded_client(conn, player):
     conn.send(to_send.encode())  # the car send
 
 
-
     cars[str(player)]['played'] = True #updating that there is a player for this car
     reply = ""
     item_num = 0 #for the items naming
@@ -56,6 +57,10 @@ def threaded_client(conn, player):
 
         current_time = pygame.time.get_ticks()#the current time
         c_items = items.copy()
+        if len(start_send) > 0:
+            if current_time - start_send['time'] >= 100 and start_send['send']:
+                start_send['send'] = False
+
         for item_name , item_dict in c_items.items():
             if current_time - item_dict['create_time'] >= 100:
                 del items[item_name]
@@ -132,6 +137,9 @@ def threaded_client(conn, player):
                         boxes[name]['time_off'] = pygame.time.get_ticks()
                         new_dict = {'create_time': pygame.time.get_ticks(), 'havesendto': [player]}
                         delete_items[name] = new_dict
+                elif parts[0] == 'game_start': #game_start~bullshit;gimel
+                    start_send['send'] = True
+                    start_send['time'] = pygame.time.get_ticks()
 
 
         except pickle.UnpicklingError as e:
@@ -140,6 +148,12 @@ def threaded_client(conn, player):
             break
 
         try: #for the sending
+            #start sending
+            if len(start_send) > 0:
+                if start_send['send']:
+                    print('send_start')
+                    to_send = f"kirmul~game_start*nothing"
+                    conn.sendall(to_send.encode())
             ###item sending
             #new_dict = {'type': 'banana','pos': data.rect,'havesendto':[player]}
             c_items = items.copy()

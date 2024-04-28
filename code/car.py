@@ -79,7 +79,7 @@ class Car(pygame.sprite.Sprite):
         self.lap_num = 0
 
         #items
-        self.item_on = 'turtle'
+        self.item_on = ''
         self.can_bump_items = True
         self.can_bump_items_time = 0
 
@@ -185,10 +185,11 @@ class Car(pygame.sprite.Sprite):
             else:
                 self.sound_track.set_volume(0)
         if self.can_press_s and pressed[pygame.K_s]:
-            self.didnt_start = False
-            self.traffic_light_on = True
-            self.traffic_light_on_time = pygame.time.get_ticks()
-            self.can_press_s = False
+            self.network.start_send()
+            # self.didnt_start = False
+            # self.traffic_light_on = True
+            # self.traffic_light_on_time = pygame.time.get_ticks()
+            # self.can_press_s = False
 
 
     def acceleration(self):
