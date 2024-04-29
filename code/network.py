@@ -76,7 +76,7 @@ class Network:
         self.client.send(to_send.encode())
 
     def lap_send(self,lap,time):
-        to_send = f"kirmul~lap_update~lap;{lap}^time:{time}"
+        to_send = f"kirmul~lap_update~lap;{lap}^time;{time}"
         self.client.send(to_send.encode())
 
     def get_info(self,display_surface,level):
@@ -104,7 +104,6 @@ class Network:
                                 for new_car in cars:
                                     level.other_cars.append(new_car)
                 elif parts[0] == 'item_send':
-                    print(f"got item: {received[0]}")
                     parts = parts[1].split("^")  # name;{name}    ,  type;{dict_inside['type']}   ,     pos;{dict_inside['pos']}    ,    angle; the angle
                     if len(parts) <= 4:
                         item_info = parts[0].split(";", 1)
@@ -154,6 +153,7 @@ class Network:
                     level.car.traffic_light_on_time = pygame.time.get_ticks()
                     level.car.can_press_s = False
                 elif parts[0] == 'lap_update':  #for lap update
+                    print('got_lap')
                     pickled_obj = parts[1].encode('latin1')
                     the_list = pickle.loads(pickled_obj)
                     level.car.lap_time_list = the_list

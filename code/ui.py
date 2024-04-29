@@ -43,54 +43,32 @@ class UI:
         self.display_surface.blit(item_surf, item_rect)
 
 
-    def draw_every_lap_time(self,list):
+    def draw_every_lap_time(self,lap_list):
+        lap_list = sorted(lap_list, key=lambda x: (-x['lap'], x['time']))
+
         transparent_surface = pygame.Surface((WIDTH, HEIGTH), pygame.SRCALPHA)
         transparent_surface.fill((0, 0, 0, 0))
         big_rect = pygame.rect.Rect(10, 10, 325, 30)
         pygame.draw.rect(transparent_surface, (150, 150, 150, 160), big_rect)
         pygame.draw.rect(transparent_surface, (100, 100, 100, 160), big_rect, 3)
 
-        place_list = [{'name':'player_1','time': 20549, 'gap':0},{'name':'player_2','time': 21579, 'gap':0},{'name':'player_3','time': 24549, 'gap':0}]
-
-        for i , dict in enumerate(place_list):
+        #place_list = [{'name':'player_1','time': 20549, 'gap':0},{'name':'player_2','time': 21579, 'gap':0},{'name':'player_3','time': 24549, 'gap':0}]
+        print(lap_list)
+        for i , dict in enumerate(lap_list):
             big_rect = pygame.rect.Rect(10, 37+i*27, 325, 30)
             pygame.draw.rect(transparent_surface, (60, 60, 60, 160), big_rect)
             pygame.draw.rect(transparent_surface, (100, 100, 100, 160), big_rect, 3)
 
 
-
-            #for the gap
-            gap_time = dict['time'] - place_list[0]['time'] - dict['gap']
-            dig = len(str(gap_time))
-            if dig < 5:
-                gap_time_str = '0' * (5 - dig) + str(gap_time)
-            else:
-                gap_time_str = str(gap_time)
-            split_index = len(gap_time_str) - 3
-            gap_time_str = gap_time_str[:split_index] + "." + gap_time_str[split_index:]
-
-            if gap_time < dict['gap']:
-                gap_time_str = f" -{gap_time_str}"
-                color = 'green'
-            elif gap_time > dict['gap']:
-                gap_time_str = f" +{gap_time_str}"
-                color = 'red'
-            else: #for 0 gap
-                gap_time_str = f" +{gap_time_str}"
-                color = 'grey'
-
-            time_text = self.font_15.render(gap_time_str, True,color)
-            time_text_rect = time_text.get_rect(topleft=(big_rect.x + 200, big_rect.y + 5))
-            self.display_surface.blit(time_text, time_text_rect)
-
-
-
-
             time = str(dict['time'])
+            time_len = len(time)
+            if time_len < 4:
+                time = '0' * (4 - time_len) + time
+
             split_index = len(time) - 3
             time = time[:split_index] + "." + time[split_index:]
 
-            time_text = self.font_15.render(f"{dict['name']}: {time}", True, (180, 180, 180))
+            time_text = self.font_15.render(f"{i+1}.  {dict['name']}: {time}  lap: {dict['lap']}", True, (80, 80, 80))
             time_text_rect = time_text.get_rect(topleft=(big_rect.x+5, big_rect.y +5))
             self.display_surface.blit(time_text, time_text_rect)
 
@@ -100,6 +78,7 @@ class UI:
         time_text = self.font_15.render('laps time:', True, (40, 40, 40))
         time_text_rect = time_text.get_rect(topleft=(15, 15))
         self.display_surface.blit(time_text, time_text_rect)
+
 
 
 
@@ -129,14 +108,14 @@ class UI:
         self.display_surface.blit(time_text, time_text_rect)
 
 
-    def ui_update(self,lap_num,item_on,players_num,time_past):
+    def ui_update(self,lap_num,item_on,lap_list,time_past):
         self.draw_lap_num(lap_num)
         if len(item_on) != 0:
             self.draw_item(item_on)
-        self.draw_every_lap_time(players_num)
+        self.draw_every_lap_time(lap_list)
         self.draw_time(time_past)
 
 
 
-        return item_on #if i has droped an item it will be empty
+        return item_on  #if i has droped an item it will be empty
 

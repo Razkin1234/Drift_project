@@ -217,11 +217,11 @@ class Level:
 			if len(self.other_cars) != 0:
 				for other_car in self.other_cars:
 					other_car.blit_other_car(self.car.rect,self.display_surface)
-		# if not self.car.didnt_start and not self.car.traffic_light_on:
-		# 	self.car.item_on = self.ui.ui_update(self.car.lap_num, self.car.item_on,self.car.number_of_players,self.car.start_time) #drawing the ui
+		if not self.car.didnt_start and not self.car.traffic_light_on:
+			self.car.item_on = self.ui.ui_update(self.car.lap_num, self.car.item_on,self.car.lap_time_list,self.car.start_time)  # drawing the ui
 
 		#not good delete after testing
-		self.car.item_on = self.ui.ui_update(self.car.lap_num, self.car.item_on,self.car.number_of_players,self.car.start_time)  # drawing the ui
+		#self.car.item_on = self.ui.ui_update(self.car.lap_num, self.car.item_on,self.car.lap_time_list,self.car.start_time)  # drawing the ui
 
 
 

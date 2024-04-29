@@ -115,6 +115,7 @@ class Car(pygame.sprite.Sprite):
         self.start_time = 0 #for the clock
         self.number_of_players = 3 #the players amount
         self.lap_time_list = []
+        self.gap_time = 0
 
 
         #for the cooldowns
@@ -182,6 +183,16 @@ class Car(pygame.sprite.Sprite):
                 self.can_use_item = False
                 self.can_use_item_time = pygame.time.get_ticks()
         if pressed[pygame.K_m] and self.can_mute:
+            #for testing laps
+            # current_time = pygame.time.get_ticks()
+            # time_since_start = current_time - self.start_time
+            # self.were_in_checkpoints.clear()
+            # self.lap_num += 1
+            # self.network.lap_send(self.lap_num, time_since_start)
+
+            #
+
+
             self.can_mute = False
             self.can_mute_time = pygame.time.get_ticks()
             if self.sound_track.get_volume() == 0:
@@ -270,9 +281,12 @@ class Car(pygame.sprite.Sprite):
                         self.were_in_checkpoints.append(1)
                 elif self.were_in_checkpoints[-1] == int(MAPS['1']['checkpoints_num']):
                     if checkpoint.sprite_type == '51': #finished lap!!!
+                        current_time = pygame.time.get_ticks()
+                        time_since_start = current_time - self.start_time
                         self.were_in_checkpoints.clear()
                         self.lap_num += 1
-                        self.network.lap_send(self.lap_num,self.start_time)
+                        self.network.lap_send(self.lap_num, time_since_start)
+                        
                 else:
                     if int(checkpoint.sprite_type) - 1 == self.were_in_checkpoints[-1]:
                         self.were_in_checkpoints.append(int(checkpoint.sprite_type))
@@ -408,8 +422,7 @@ class Car(pygame.sprite.Sprite):
             self.traffic_lights()
 
         if self.didnt_start:
-            pass
-            #self.didnt_start_screen_draw()
+            self.didnt_start_screen_draw()
 
 
         

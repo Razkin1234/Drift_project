@@ -109,7 +109,6 @@ def threaded_client(conn, player):
                     item_info = parts[0].split(";",1)         #type   ,   the type
                     if item_info[0] == 'type':
                         if item_info[1] == 'banana': #for banana items
-                            print('got banana')
                             item_info = parts[1].split(";",1)             #pos    ,     the pos
                             if item_info[0] == 'pos':
                                 new_dict = {'type': 'banana','pos': item_info[1],'havesendto':[player], 'create_time': pygame.time.get_ticks()}
@@ -148,7 +147,7 @@ def threaded_client(conn, player):
                     start_send['send'] = True
                     start_send['time'] = pygame.time.get_ticks()
 
-                elif parts[0] == 'lap_update': #lap_update~lap;{lap}^time:{time}
+                elif parts[0] == 'lap_update': #lap_update~lap;{lap}^time;{time}
                     parts = parts[1].split('^')
                     item_info = parts[0].split(';')
                     if item_info[0] == 'lap':
@@ -156,8 +155,10 @@ def threaded_client(conn, player):
                         item_info = parts[1].split(';')
                         if item_info[0] == 'time':
                             cars[str(player)]['time'] = int(item_info[1])
+                            cars[str(player)]['gap'] = item_info[1]
                             lap_send['send'] = True
                             lap_send['time'] = pygame.time.get_ticks()
+
 
         except pickle.UnpicklingError as e:
             print("Error while unpickling:", e)
@@ -173,21 +174,20 @@ def threaded_client(conn, player):
                         if dict_info['played']:
                             number_of_players += 1
 
-                    print(f'send_start: {number_of_players}')
                     to_send = f"kirmul~game_start~players_num;{number_of_players}*nothing"
                     conn.sendall(to_send.encode())
 
-            #lap update sending   [{'name':'player_1','time': 20549, 'gap':0},{'name':'player_2','time': 21579, 'gap':0},{'name':'player_3','time': 24549, 'gap':0}]
-            # if len(lap_send) > 0:
-            #     if lap_send['send']:
-            #         list = []
-            #         for name , dict_info in cars.items():
-            #             if dict_info['played']:
-            #                 new_dict = {'name': dict_info['name'],'time': dict_info['time'], 'gap':dict_info['gap']}
-            #                 list.append(new_dict)
-            #         print(f'lap_send: {list}')
-            #         to_send = f"kirmul~lap_update~{pickle.dumps(list).decode('latin1')}*nothing"
-            #         conn.sendall(to_send.encode())
+            #lap update sending   [{'name':'player_1','time': 20549, 'lap':0},{'name':'player_2','time': 21579, 'lap':0},{'name':'player_3','time': 24549, 'lap':0}]
+            if len(lap_send) > 0:
+                if lap_send['send']:
+                    list = []
+                    for name , dict_info in cars.items():
+                        if dict_info['played']:
+                            new_dict = {'name': dict_info['name'],'time': dict_info['time'], 'lap':dict_info['lap']}
+                            list.append(new_dict)
+                    print(f'lap_send: {list}')
+                    to_send = f"kirmul~lap_update~{pickle.dumps(list).decode('latin1')}*nothing"
+                    conn.sendall(to_send.encode())
 
 
 
@@ -201,11 +201,9 @@ def threaded_client(conn, player):
                         conn.sendall(to_send.encode())
                     elif dict_inside['type'] == 'turtle':
                         to_send = f"kirmul~item_send~name;{name}^type;{dict_inside['type']}^pos;{dict_inside['pos']}^angle;{dict_inside['angle']}*nothing"
-                        print(f"sending {player}:  {to_send}")
                         conn.sendall(to_send.encode())
                     elif dict_inside['type'] == 'box':
                         to_send = f"kirmul~item_send~name;{name}^type;box^pos;{dict_inside['pos']}*nothing"
-                        print(f"sending {player}:  {to_send}")
                         conn.sendall(to_send.encode())
 
             #to delete items:
