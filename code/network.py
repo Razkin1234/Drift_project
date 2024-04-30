@@ -167,5 +167,6 @@ class Network:
 
 
         except pickle.UnpicklingError as e:
-            print("Error while unpickling:", e)
-            traceback.print_exc()  # Print traceback for debugging
+            # print("Error while unpickling:", e)
+            # traceback.print_exc()  # Print traceback for debugging
+            pass

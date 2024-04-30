@@ -1,4 +1,5 @@
 from support import *
+from other_cars import Other_cars
 #game setup
 WIDTH = 1280
 HEIGTH = 720
@@ -16,7 +17,18 @@ MAPS = {
 			'5': {'location': (1050, 1222), 'is_on': False, 'time_off': 0.0},
 			'6': {'location': (1095, 1222), 'is_on': False, 'time_off': 0.0},
 			'7': {'location': (1518, 1178), 'is_on': False, 'time_off': 0.0},
-			'8': {'location': (1518, 1223), 'is_on': False, 'time_off': 0.0},}}
+			'8': {'location': (1518, 1223), 'is_on': False, 'time_off': 0.0},},
+		  'cars' : {
+		'0': {'object': Other_cars('1', (2170, 1344), 180, 'tank.png'), 'round': 0, 'played': False, 'lap': 0, 'time': 0,
+			  'name': 'player_1', 'gap': 0, 'left': False},
+		'1': {'object': Other_cars('2', (2120, 1344), 180, 'taxi.png'), 'round': 0, 'played': False, 'lap': 0, 'time': 0,
+			  'name': 'player_2', 'gap': 0, 'left': False},
+		'2': {'object': Other_cars('3', (2070, 1344), 180, 'batmobile.png'), 'round': 0, 'played': False, 'lap': 0,
+			  'time': 0, 'name': 'player_3', 'gap': 0, 'left': False},
+		'3': {'object': Other_cars('4', (2020, 1344), 180, 'orange_car.png'), 'round': 0, 'played': False, 'lap': 0,
+			  'time': 0, 'name': 'player_4', 'gap': 0, 'left': False}}
+}
+
 }
 
 #for the map printing

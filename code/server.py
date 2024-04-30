@@ -17,7 +17,7 @@ try:
 except socket.error as e:
     str(e)
 
-s.listen(4)
+s.listen()
 print("Waiting for a connection, Server Started")
 
 cars = {'0': {'object': Other_cars('1',(2170, 1344),180,'tank.png'),'round': 0 ,'played': False , 'lap': 0 , 'time': 0, 'name': 'player_1', 'gap': 0,'left': False},
@@ -127,6 +127,13 @@ def threaded_client(conn, player):
                     cars[str(player)]['played'] = False
                     cars[str(player)]['left'] = True
                     print(f'player {player} has disconnected')
+                    no_one = True
+                    for key , dict in cars.items():
+                        if dict['played']:
+                            no_one = False
+                    if no_one:
+                        restart()
+
                     break
                 elif parts[0] == 'item_delete':    #"kirmul~item_delete~name;{item_name}"
                     item_info = parts[1].split(';')
@@ -234,6 +241,17 @@ def threaded_client(conn, player):
     conn.close()
 
 
+def restart():
+    global cars, boxes, items, delete_items, start_send, lap_send , currentPlayer
+    currentPlayer = 0
+    cars = MAPS['1']['cars']
+    boxes = MAPS['1']['boxes']
+    items ={}
+    delete_items = {}
+    start_send = {}
+    lap_send = {}
+
+
 
 
 currentPlayer = 0
@@ -241,9 +259,11 @@ while True:
     print(f'start_send: {start_send}')
     conn, addr = s.accept()
     if len(start_send) == 0:
-        print("Connected to:", addr)
-
-        start_new_thread(threaded_client, (conn, currentPlayer))
-        currentPlayer += 1
+        if currentPlayer < 4:
+            print("Connected to:", addr)
+            start_new_thread(threaded_client, (conn, currentPlayer))
+            currentPlayer += 1
+        else:
+            conn.close()
     else:
         conn.close()
