@@ -114,7 +114,7 @@ class UI:
         #lap_list = sorted(lap_list, key=lambda x: (-x['lap'], x['time']))
         copy_list = lap_list.copy()
         for dict in copy_list:
-            if not dict['lap'] != self.num_lap:
+            if dict['lap'] != int(self.number_of_laps):
                 lap_list.remove(dict)
 
 

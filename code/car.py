@@ -138,6 +138,9 @@ class Car(pygame.sprite.Sprite):
 
         self.can_press_s = True
 
+        self.wait_till_finish = False
+        self.wait_till_finish_time = 0
+
 
     def start_game(self):
         self.traffic_light_on = True
@@ -285,9 +288,17 @@ class Car(pygame.sprite.Sprite):
             pass
 
     def finish(self):
-        if len(self.lap_time_list) > 0:
-            self.end_start_music = self.end_loose_start_music
-            self.end_loop_music = self.end_loose_loop_music
+        copy_list = self.lap_time_list.copy()
+        looser = False
+        for dict in copy_list:
+            if dict['lap'] != int(MAPS[str(self.map_num)]['lap_num']):
+                copy_list.remove(dict)
+
+        for i , dict in enumerate(copy_list):
+            if self.final_time == dict['time']:
+                if i != 0:
+                    self.end_start_music = self.end_loose_start_music
+                    self.end_loop_music = self.end_loose_loop_music
 
         self.can_move = False
         self.sound_channel.stop()
@@ -311,7 +322,9 @@ class Car(pygame.sprite.Sprite):
                         self.network.lap_send(self.lap_num, time_since_start)
                         if self.lap_num == int(MAPS[self.map_num]['lap_num']):
                             self.final_time = time_since_start
-                            self.finish()
+                            self.wait_till_finish = True
+                            self.wait_till_finish_time = pygame.time.get_ticks()
+
 
                 else:
                     if int(checkpoint.sprite_type) - 1 == self.were_in_checkpoints[-1]:
@@ -369,6 +382,10 @@ class Car(pygame.sprite.Sprite):
         if not self.can_mute:
             if current_time - self.can_mute_time >= 500:
                 self.can_mute = True
+        if self.wait_till_finish:
+            if current_time - self.wait_till_finish_time >= 50:
+                self.wait_till_finish = False
+                self.finish()
 
 
     def traffic_lights(self):
