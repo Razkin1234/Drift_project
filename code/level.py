@@ -29,18 +29,20 @@ class Level:
 
 		self.grass_numbers :int = [4,31,33,40,44] #all the grass numbers in the csv file
 
+		self.map_num = '1'
+
 		#camera
 		self.camera = pygame.math.Vector2()
 
 
 
 		self.layout: dict[str: List[list[int]]] = {
-			'floor' : MAPS['1']['floor'] ,
-			'checkpoints' : MAPS['1']['checkpoints']
+			'floor' : MAPS[self.map_num]['floor'] ,
+			'checkpoints' : MAPS[self.map_num]['checkpoints']
 			#'checkpoints_num' : MAPS['1']['checkpoints_num']
 		}
 
-		self.boxes = MAPS['1']['boxes']
+		self.boxes = MAPS[self.map_num]['boxes']
 
 		#for the online:
 		self.network = network
@@ -53,7 +55,7 @@ class Level:
 		self.car_prev_location = self.car.rect[0:2]
 
 		#for the ui
-		self.ui = UI(self.item_sprites,self.car.lap_num)
+		self.ui = UI(self.item_sprites,self.car.lap_num,self.map_num)
 
 		self.item = Item
 
@@ -62,7 +64,7 @@ class Level:
 
 
 	def create_map(self):
-		self.car = Car((self.network.getP().pos[:2]), [self.visible_sprites], self.obstacle_sprites, self.display_surface,self.network.getP().angle,self.boxes ,self.checkpoint_sprites,self.item_sprites,self.network.getP(),self.network,self.car_skin)
+		self.car = Car((self.network.getP().pos[:2]), [self.visible_sprites], self.obstacle_sprites, self.display_surface,self.network.getP().angle,self.boxes ,self.checkpoint_sprites,self.item_sprites,self.network.getP(),self.network,self.car_skin,self.map_num)
 
 		self.car_prev_location = self.car.rect[0:2]
 		# Center camera
@@ -201,8 +203,10 @@ class Level:
 
 		self.visible_sprites.custom_draw(self.car)
 		self.visible_sprites.update()
-
-		self.item_sprites.custom_draw(self.car)
+		try:
+			self.item_sprites.custom_draw(self.car)
+		except:
+			pass
 		self.item_sprites.update()
 
 		self.floor_update()
@@ -217,8 +221,10 @@ class Level:
 			if len(self.other_cars) != 0:
 				for other_car in self.other_cars:
 					other_car.blit_other_car(self.car.rect,self.display_surface)
-		if not self.car.didnt_start and not self.car.traffic_light_on:
+		if not self.car.didnt_start and not self.car.traffic_light_on and not self.car.finished:
 			self.car.item_on = self.ui.ui_update(self.car.lap_num, self.car.item_on,self.car.lap_time_list,self.car.start_time)  # drawing the ui
+		elif self.car.finished:
+			self.ui.finish_update(self.car.lap_time_list,self.car.final_time)
 
 		#not good delete after testing
 		#self.car.item_on = self.ui.ui_update(self.car.lap_num, self.car.item_on,self.car.lap_time_list,self.car.start_time)  # drawing the ui

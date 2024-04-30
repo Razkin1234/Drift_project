@@ -20,10 +20,10 @@ except socket.error as e:
 s.listen(4)
 print("Waiting for a connection, Server Started")
 
-cars = {'0': {'object': Other_cars('1',(2170, 1344),180,'tank.png'),'round': 0 ,'played': False , 'lap': 0 , 'time': 0, 'name': 'efi', 'gap': 0},
-        '1': {'object': Other_cars('2',(2120, 1344),180,'taxi.png'),'round': 0 , 'played': False, 'lap': 0 , 'time': 0, 'name': 'play1', 'gap': 0},
-        '2': {'object': Other_cars('3',(2070, 1344),180,'batmobile.png'),'round': 0 , 'played': False, 'lap': 0 , 'time': 0, 'name': 'play2', 'gap': 0},
-        '3': {'object': Other_cars('4',(2020, 1344),180,'orange_car.png'),'round': 0 , 'played': False, 'lap': 0 , 'time': 0, 'name': 'yesh3', 'gap': 0}} #all of the cars
+cars = {'0': {'object': Other_cars('1',(2170, 1344),180,'tank.png'),'round': 0 ,'played': False , 'lap': 0 , 'time': 0, 'name': 'player_1', 'gap': 0,'left': False},
+        '1': {'object': Other_cars('2',(2120, 1344),180,'taxi.png'),'round': 0 , 'played': False, 'lap': 0 , 'time': 0, 'name': 'player_2', 'gap': 0,'left': False},
+        '2': {'object': Other_cars('3',(2070, 1344),180,'batmobile.png'),'round': 0 , 'played': False, 'lap': 0 , 'time': 0, 'name': 'player_3', 'gap': 0,'left': False},
+        '3': {'object': Other_cars('4',(2020, 1344),180,'orange_car.png'),'round': 0 , 'played': False, 'lap': 0 , 'time': 0, 'name': 'player_4', 'gap': 0,'left': False}} #all of the cars
 
 
 #'type':   ,'pos':  ,'havesendto': (the players that got the item in an array),'angle'(for turtle type only):
@@ -125,6 +125,7 @@ def threaded_client(conn, player):
 
                 elif parts[0] == 'disconnect':
                     cars[str(player)]['played'] = False
+                    cars[str(player)]['left'] = True
                     print(f'player {player} has disconnected')
                     break
                 elif parts[0] == 'item_delete':    #"kirmul~item_delete~name;{item_name}"
@@ -182,9 +183,10 @@ def threaded_client(conn, player):
                 if lap_send['send']:
                     list = []
                     for name , dict_info in cars.items():
-                        if dict_info['played']:
+                        if dict_info['played'] or dict_info['left']:
                             new_dict = {'name': dict_info['name'],'time': dict_info['time'], 'lap':dict_info['lap']}
                             list.append(new_dict)
+                    list = sorted(list, key=lambda x: (-x['lap'], x['time']))
                     print(f'lap_send: {list}')
                     to_send = f"kirmul~lap_update~{pickle.dumps(list).decode('latin1')}*nothing"
                     conn.sendall(to_send.encode())

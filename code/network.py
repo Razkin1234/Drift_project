@@ -153,7 +153,6 @@ class Network:
                     level.car.traffic_light_on_time = pygame.time.get_ticks()
                     level.car.can_press_s = False
                 elif parts[0] == 'lap_update':  #for lap update
-                    print('got_lap')
                     pickled_obj = parts[1].encode('latin1')
                     the_list = pickle.loads(pickled_obj)
                     level.car.lap_time_list = the_list

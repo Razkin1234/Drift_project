@@ -11,7 +11,7 @@ from other_cars import Other_cars
 
 
 class Car(pygame.sprite.Sprite):
-    def __init__(self, pos ,groups, obstacle_sprites,display_surface,angle,boxes,checkpoint_sprites,item_sprites,car_to_send,network,car_skin):
+    def __init__(self, pos ,groups, obstacle_sprites,display_surface,angle,boxes,checkpoint_sprites,item_sprites,car_to_send,network,car_skin,map_num):
         super().__init__(groups)
         # drift_acceleration from 0.1 to 2, max_velocity should be less than 1.5
         pygame.sprite.Sprite.__init__(self)
@@ -52,6 +52,7 @@ class Car(pygame.sprite.Sprite):
         #for the car image:
 
         self.car_skin = car_skin
+        self.map_num = map_num
 
 
         self.original_image = pygame.image.load(f'../graphics/cars/{self.car_skin}').convert_alpha() #the car image
@@ -108,6 +109,13 @@ class Car(pygame.sprite.Sprite):
         self.do_sound = True #for the sound
         self.start_sound = pygame.mixer.Sound('../graphics/sound/start_sound.wav')
         self.sound_track = pygame.mixer.Sound('../graphics/sound/sound_track.wav')
+        self.end_start_music = pygame.mixer.Sound('../graphics/sound/end_start.wav')
+        self.end_loop_music = pygame.mixer.Sound('../graphics/sound/end_loop.wav')
+        self.end_loose_start_music = pygame.mixer.Sound('../graphics/sound/end_start_loose.wav')
+        self.end_loose_loop_music = pygame.mixer.Sound('../graphics/sound/end_loop_loose.wav')
+        self.played_end_loop = False
+        self.play_end_start_time = 0
+        self.sound_channel = None
 
 
         self.didnt_start = True
@@ -117,6 +125,9 @@ class Car(pygame.sprite.Sprite):
         self.lap_time_list = []
         self.gap_time = 0
 
+        self.finished = False #for the end of the race
+        self.final_time = 0
+        self.didnt_start = True
 
         #for the cooldowns
         self.can_use_item = True
@@ -182,7 +193,7 @@ class Car(pygame.sprite.Sprite):
                 self.item_on = ''
                 self.can_use_item = False
                 self.can_use_item_time = pygame.time.get_ticks()
-        if pressed[pygame.K_m] and self.can_mute:
+        if pressed[pygame.K_m] and self.can_mute and self.sound_channel != None:
             #for testing laps
             # current_time = pygame.time.get_ticks()
             # time_since_start = current_time - self.start_time
@@ -195,10 +206,10 @@ class Car(pygame.sprite.Sprite):
 
             self.can_mute = False
             self.can_mute_time = pygame.time.get_ticks()
-            if self.sound_track.get_volume() == 0:
-                self.sound_track.set_volume(1)
+            if self.sound_channel.get_volume() == 0:
+                self.sound_channel.set_volume(1)
             else:
-                self.sound_track.set_volume(0)
+                self.sound_channel.set_volume(0)
         if self.can_press_s and pressed[pygame.K_s]:
             self.network.start_send()
             # self.didnt_start = False
@@ -273,6 +284,18 @@ class Car(pygame.sprite.Sprite):
         except:
             pass
 
+    def finish(self):
+        if len(self.lap_time_list) > 0:
+            self.end_start_music = self.end_loose_start_music
+            self.end_loop_music = self.end_loose_loop_music
+
+        self.can_move = False
+        self.sound_channel.stop()
+        self.finished = True
+        self.play_end_start_time = pygame.time.get_ticks()
+        self.sound_channel = self.end_start_music.play()
+
+
     def checkpoints_collision(self):
         for checkpoint in self.checkpoint_sprites:
             if pygame.sprite.collide_mask(self,checkpoint):
@@ -286,7 +309,10 @@ class Car(pygame.sprite.Sprite):
                         self.were_in_checkpoints.clear()
                         self.lap_num += 1
                         self.network.lap_send(self.lap_num, time_since_start)
-                        
+                        if self.lap_num == int(MAPS[self.map_num]['lap_num']):
+                            self.final_time = time_since_start
+                            self.finish()
+
                 else:
                     if int(checkpoint.sprite_type) - 1 == self.were_in_checkpoints[-1]:
                         self.were_in_checkpoints.append(int(checkpoint.sprite_type))
@@ -378,7 +404,7 @@ class Car(pygame.sprite.Sprite):
                     self.green_light = False
                     self.traffic_light_on = False
                     self.start = False
-                    self.sound_track.play(loops=-1)
+                    self.sound_channel = self.sound_track.play(loops=-1)
 
 
 
@@ -405,17 +431,24 @@ class Car(pygame.sprite.Sprite):
 
 
     def update(self):
+        if not self.finished:
+            self.input()  # for the inputs
+            self.collision() #for the collisions
+            self.checkpoints_collision()
+            self.acceleration()  # for the car to gain speed
+            self.item_collision() #for the items collision
+            self.traction()  # for the traction of the car
+        else: #if finished the game
+            current_time = pygame.time.get_ticks()
+            music_len = self.end_start_music.get_length()
+            music_len = int(music_len * 1000)
+            if not self.played_end_loop and current_time - self.play_end_start_time >= music_len:
+                self.played_end_loop = True
+                self.sound_channel = self.end_loop_music.play(loops=-1)
 
-        self.input()  # for the inputs
-        self.collision() #for the collisions
-        self.checkpoints_collision()
-        self.acceleration()  # for the car to gain speed
-        self.item_collision() #for the items collision
-        #self.box_return() #for the boxes to be back after disappering #the server should do it
+
+
         self.timer()
-
-        self.traction()  # for the traction of the car
-
         self.car_to_send.update_own_data(self.rect,self.angle)
 
         if self.traffic_light_on:
