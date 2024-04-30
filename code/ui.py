@@ -50,14 +50,14 @@ class UI:
 
         transparent_surface = pygame.Surface((WIDTH, HEIGTH), pygame.SRCALPHA)
         transparent_surface.fill((0, 0, 0, 0))
-        big_rect = pygame.rect.Rect(10, 10, 325, 30)
+        big_rect = pygame.rect.Rect(10, 10, 340, 30)
         pygame.draw.rect(transparent_surface, (150, 150, 150, 160), big_rect)
         pygame.draw.rect(transparent_surface, (100, 100, 100, 160), big_rect, 3)
 
         #place_list = [{'name':'player_1','time': 20549, 'gap':0},{'name':'player_2','time': 21579, 'gap':0},{'name':'player_3','time': 24549, 'gap':0}]
 
         for i , dict in enumerate(lap_list):
-            big_rect = pygame.rect.Rect(10, 37+i*27, 325, 30)
+            big_rect = pygame.rect.Rect(10, 37+i*27, 340, 30)
             pygame.draw.rect(transparent_surface, (60, 60, 60, 160), big_rect)
             pygame.draw.rect(transparent_surface, (100, 100, 100, 160), big_rect, 3)
 
@@ -70,7 +70,7 @@ class UI:
             split_index = len(time) - 3
             time = time[:split_index] + "." + time[split_index:]
 
-            time_text = self.font_15.render(f"{i+1}. {dict['name']}: {time}  lap: {dict['lap']}", True, (80, 80, 80))
+            time_text = self.font_15.render(f"{i+1}. {dict['name']}: {time}  lap:{dict['lap']}", True, (80, 80, 80))
             time_text_rect = time_text.get_rect(topleft=(big_rect.x+5, big_rect.y +5))
             self.display_surface.blit(time_text, time_text_rect)
 
